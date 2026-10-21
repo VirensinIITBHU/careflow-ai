@@ -1,0 +1,431 @@
+# GENERAL SCREENING POLICY v0.3. NOT CLINICALLY VALIDATED.
+# DRAFT: paraphrases, transliterations, and new categories need clinician review.
+# A starting structure only. A clinician should replace categories/terms; no code changes needed.
+# Terms use case-insensitive substring matching; optional near rules match nearby tokens. Context cues (negation / past) are handled in
+# safety/engine.py. A match never diagnoses; it only asks a human to look.
+version: general-v0.3
+categories:
+  - id: breathing_difficulty
+    tier: immediate
+    title: Breathing difficulty mentioned
+    rationale: Difficulty breathing is a general warning sign that needs prompt human review.
+    terms:
+      - difficulty breathing
+      - difficulty in breathing
+      - trouble breathing
+      - shortness of breath
+      - short of breath
+      - breathing problem
+      - breathing issue
+      - hard to breathe
+      - can't breathe
+      - cannot breathe
+      - unable to breathe
+      - struggling to breathe
+      - breathless
+      - gasping
+      - saans lene mein
+      - saans lene me
+      - saans nahi
+      - saans phool
+      - saans ki takleef
+      - dam ghut
+      - सांस लेने में
+      - साँस लेने में
+      - सांस फूल
+      - साँस फूल
+      - सांस नहीं
+      - साँस नहीं
+      - सांस की तकलीफ
+      - दम घुट
+      - breathing difficulty
+      - dyspnea
+      - dyspnoea
+      - "not breathing"
+      - "stopped breathing"
+      - "not able to breathe"
+      - "unable to take a breath"
+      - "turning blue"
+      - "blue lips"
+      - "saans ruk"
+      - "सांस रुक"
+      - "ब्रीदिंग प्रॉब्लम"
+      - "डिफिकल्टी इन ब्रीदिंग"
+      - "शॉर्टनेस ऑफ ब्रेथ"
+      - "सांस लेने में तकलीफ"
+      - سانس لینے میں
+      - سانس نہیں
+      - سانس پھول
+      - دم گھٹ
+      - سانس کی تکلیف
+    near:
+      - a: [breath, breathing, breathe, breathless]
+        b: [difficulty, trouble, hard, struggling, unable, cannot, can't, problem, problems, short, labored, laboured, heavy]
+        max_gap: 3
+        exclude: [exercise, exercises, technique, practice]
+  - id: chest_pain
+    tier: immediate
+    title: Chest pain or pressure mentioned
+    rationale: Chest pain or pressure is a general warning sign that needs prompt human review.
+    terms:
+      - chest pain
+      - chest tightness
+      - chest discomfort
+      - tight chest
+      - pressure in chest
+      - pain in my chest
+      - seene mein dard
+      - seene me dard
+      - chhati mein dard
+      - chaati mein dard
+      - सीने में दर्द
+      - छाती में दर्द
+      - सीने में जकड़न
+      - सीने में दबाव
+      - pain in chest
+      - سینے میں درد
+      - سینے میں تکلیف
+      - سینے میں جکڑن
+      - سینے میں دباؤ
+      - chest heaviness
+      - heavy chest
+      - squeezing chest
+      - crushing chest
+      - "heart attack"
+      - "dil mein dard"
+      - "दिल में दर्द"
+      - "चेस्ट पेन"
+      - "सीने में भारीपन"
+      - "seene mein tightness"
+    near:
+      - a: [chest]
+        b: [pain, pains, tightness, tight, pressure, discomfort, heaviness, heavy, squeezing, crushing]
+        max_gap: 3
+  - id: loss_of_consciousness
+    tier: immediate
+    title: Fainting or loss of consciousness mentioned
+    rationale: Fainting or unresponsiveness is a general warning sign that needs prompt human review.
+    terms:
+      - fainted
+      - fainting
+      - passed out
+      - blacked out
+      - unconscious
+      - unresponsive
+      - lost consciousness
+      - behosh
+      - बेहोश
+      - loss of consciousness
+      - بے ہوش
+      - بیہوش
+      - collapsed
+      - blacking out
+      - went limp
+      - not responding
+      - बेहोशी
+      - अनकॉन्शियस
+    near:
+      - a: [lost, loss, lose]
+        b: [consciousness, conscious]
+        max_gap: 2
+  - id: stroke_signs
+    tier: immediate
+    title: Possible stroke-like signs mentioned
+    rationale: Sudden one-sided weakness, face drooping or speech trouble need prompt human review.
+    terms:
+      - face drooping
+      - drooping face
+      - slurred speech
+      - weakness on one side
+      - numbness on one side
+      - sudden weakness
+      - muh tedha
+      - zubaan ladkhada
+      - मुंह टेढ़ा
+      - जुबान लड़खड़ा
+      - منہ ٹیڑھا
+      - زبان لڑکھڑا
+      - "mooh tedha"
+      - "munh tedha"
+      - "मुँह टेढ़ा"
+      - "चेहरा टेढ़ा"
+      - "बोल नहीं पा"
+      - "आवाज़ लड़खड़ा"
+    near:
+      - a: [face, mouth, arm, leg]
+        b: [drooping, droop, droops, numb, numbness, weak, weakness]
+        max_gap: 3
+      - a: [speech, speaking]
+        b: [slurred, slurring, garbled]
+        max_gap: 2
+  - id: severe_bleeding
+    tier: immediate
+    title: Heavy bleeding mentioned
+    rationale: Heavy or uncontrolled bleeding needs prompt human review.
+    terms:
+      - heavy bleeding
+      - bleeding heavily
+      - stopped bleeding
+      - bleeding stopped
+      - stopped bleeding
+      - bleeding stopped
+      - bleeding won't stop
+      - won't stop bleeding
+      - bahut khoon
+      - bahut zyada khoon
+      - khoon band nahi
+      - बहुत खून
+      - खून बंद नहीं
+      - بہت خون
+      - خون بند نہیں
+    near:
+      - a: [bleeding, blood, haemorrhage, hemorrhage]
+        b: [heavy, heavily, profuse, uncontrolled, soaking, gushing, nonstop]
+        max_gap: 3
+        exclude: [test, tests, pressure, donation, sample, samples]
+  - id: seizure
+    tier: immediate
+    title: Seizure or convulsion mentioned
+    rationale: Seizures or convulsions need prompt human review.
+    terms:
+      - seizure
+      - convulsion
+      - had a fit
+      - having fits
+      - epileptic
+      - mirgi
+      - daura pada
+      - मिर्गी
+      - दौरा पड़ा
+      - مرگی
+      - دورہ پڑا
+      - convulsing
+      - convulsed
+      - fitting
+      - grand mal
+    near:
+      - a: [shaking, jerking, twitching]
+        b: [uncontrollably, uncontrollable, violently]
+        max_gap: 3
+  - id: self_harm
+    tier: immediate
+    title: Possible self-harm or suicidal wording
+    rationale: Wording about self-harm or ending life needs prompt, careful human review.
+    terms:
+      - kill myself
+      - end my life
+      - want to die
+      - suicid
+      - hurt myself
+      - self-harm
+      - self harm
+      - jaan dena
+      - marna chahta
+      - marna chahti
+      - आत्महत्या
+      - मरना चाहता
+      - मरना चाहती
+      - जान देना
+      - خودکشی
+      - مرنا چاہتا
+      - مرنا چاہتی
+      - end it all
+      - better off dead
+      - no reason to live
+      - take my own life
+      - "don't want to live"
+      - do not want to live
+      - wish i was dead
+      - cut myself
+      - harm myself
+      - overdose on purpose
+      - "jeene ka mann nahi"
+      - "जीने का मन नहीं"
+      - "feel like dying"
+      - "felt like dying"
+      - "मर जाना चाहता"
+      - "मर जाना चाहती"
+      - "life is not worth"
+      - "life isn't worth"
+    near:
+      - a: [kill, end, hurt, harm, cut]
+        b: [myself, life]
+        max_gap: 3
+        exclude: [care, palliative, hospice, course]
+  - id: confusion
+    tier: urgent
+    title: Confusion or disorientation mentioned
+    rationale: New confusion or disorientation should be reviewed soon by a human.
+    terms:
+      - confused
+      - confusion
+      - disoriented
+      - hosh nahi
+      - होश नहीं
+      - not making sense
+      - "doesn't recognize"
+      - does not recognise
+      - disorientated
+      - "can't think straight"
+      - "does not recognize"
+      - "doesn't recognise"
+  - id: poisoning_overdose
+    tier: immediate
+    title: Poisoning, overdose or venomous bite mentioned
+    rationale: Possible poisoning, overdose, or venomous bite needs prompt human review.
+    terms:
+      - swallowed poison
+      - drank poison
+      - swallowed pesticide
+      - drank phenyl
+      - took too many tablets
+      - took too many pills
+      - overdosed
+      - overdose of tablets
+      - overdose of pills
+      - medication overdose
+      - drug overdose
+      - snake bite
+      - snakebite
+      - bitten by a snake
+      - scorpion sting
+      - saanp ne kaat
+      - zeher pi
+      - "ज़हर पी"
+      - "जहर पी"
+      - "कीटनाशक पी"
+      - "सांप ने काट"
+      - "बिच्छू ने काट"
+      - "ओवरडोज हो गया"
+      - "ओवरडोज हो सकता"
+      - "pesticide pi"
+      - "pesticide pee liya"
+      - "poison pi"
+      - "phenyl pi"
+    near:
+      - a: [overdose, ओवरडोज]
+        b: [tablet, tablets, pill, pills, medicine, medication, drug, drugs, दवा, गोलियां, गोली]
+        max_gap: 4
+  - id: anaphylaxis
+    tier: immediate
+    title: Possible severe allergic reaction mentioned
+    rationale: Throat, tongue, face or lip swelling after exposure needs prompt human review.
+    terms:
+      - anaphylaxis
+      - anaphylactic
+      - throat closing
+      - throat is closing
+      - throat swelling
+      - swollen tongue
+      - tongue swelling
+      - tongue is swelling
+      - tongue is swollen
+      - tongue is swelling
+      - tongue is swollen
+      - swelling of lips
+      - swelling of the lips
+      - lips swelling
+      - "गला बंद"
+      - "गले में सूजन"
+      - "होंठ सूज"
+      - hont sooj
+      - hont sooj rahe
+      - hont sooj
+      - hont sooj rahe
+  - id: head_injury
+    tier: urgent
+    title: Head injury mentioned
+    rationale: A recent head injury should be reviewed by a human, especially with vomiting or drowsiness.
+    terms:
+      - head injury
+      - head trauma
+      - hit my head
+      - hit his head
+      - hit her head
+      - fell on his head
+      - fell on her head
+      - fell on my head
+      - "सर में चोट"
+      - "सिर में चोट"
+      - "हेड इंजरी"
+      - sir mein chot
+      - sar mein chot
+  - id: blood_in_vomit_or_stool
+    tier: urgent
+    title: Blood in vomit, stool or urine mentioned
+    rationale: Blood in vomit, stool or urine should be reviewed soon by a human.
+    terms:
+      - blood in vomit
+      - vomiting blood
+      - vomited blood
+      - blood in stool
+      - black stool
+      - blood in urine
+      - "स्टूल के अंदर ब्लड क्लोट्स"
+      - "ब्लड क्लोट्स"
+      - "खून के थक्के"
+      - ulti mein khoon
+      - potty mein khoon
+      - खून की उल्टी
+      - उल्टी में खून
+      - मल में खून
+      - पेशाब में खून
+      - قے میں خون
+      - پاخانے میں خون
+      - پیشاب میں خون
+      - bloody stool
+      - bloody stools
+      - bloody diarrhea
+      - bloody diarrhoea
+      - tarry stool
+      - melena
+      - hematemesis
+      - haematemesis
+      - hematuria
+      - haematuria
+      - coffee ground
+      - coffee-ground
+      - rectal bleeding
+      - bleeding from rectum
+      - blood on toilet paper
+      - potty me khoon
+      - khoon wali ulti
+    near:
+      - a: [blood, bloody, clot, clots, clotted, black, tarry, red, ब्लड, खून, क्लोट्स, थक्के]
+        b: [stool, stools, motion, motions, potty, poop, feces, faeces, vomit, vomiting, vomited, urine, toilet, स्टूल, मल, पॉटी, मोशन, उल्टी, पेशाब, यूरिन]
+        max_gap: 4
+        exclude: [test, tests, report, reports, sample, samples, culture, pressure, group, sugar, count, donation, donor, टेस्ट, रिपोर्ट, प्रेशर, ग्रुप, शुगर]
+      - a: [blood, bloody, clot, clots, clotted, black, tarry, red]
+        b: [stool, stools, motion, motions, potty, poop, feces, faeces, vomit, vomiting, vomited, urine, toilet]
+        max_gap: 4
+        exclude: [test, tests, report, reports, sample, samples, culture, pressure, group, sugar, count, donation, donor]
+  - id: severe_pain
+    tier: urgent
+    title: Severe pain mentioned
+    rationale: Severe or unbearable pain should be reviewed soon by a human.
+    terms:
+      - unbearable pain
+      - severe pain
+      - worst pain
+      - excruciating
+      - bahut tez dard
+      - bahut zyada dard
+      - असहनीय दर्द
+      - बहुत तेज दर्द
+      - बहुत ज्यादा दर्द
+      - "बहुत तेज पेन"
+      - "बहुत तेज़ पेन"
+      - "बहुत तेज़ दर्द"
+      - "बहुत तेज पेन"
+      - "बहुत तेज़ पेन"
+      - "बहुत तेज़ दर्द"
+      - ناقابل برداشت درد
+      - بہت تیز درد
+      - بہت زیادہ درد
+    near:
+      - a: [दर्द, पेन]
+        b: [तेज, तेज़, भयंकर, सीवियर, असहनीय, इंटेंस]
+        max_gap: 2
+      - a: [pain, ache, headache]
+        b: [severe, unbearable, worst, excruciating, intense, terrible, agonizing, agonising]
+        max_gap: 3

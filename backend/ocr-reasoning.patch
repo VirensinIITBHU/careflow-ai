@@ -1,0 +1,23 @@
+--- /tmp/llm_prev.py	2026-10-19 09:55:55.708622291 +0000
++++ app/llm.py	2026-10-19 09:55:55.753107599 +0000
+@@ -59,8 +59,13 @@
+             "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]}
+     if "gpt-oss" in model and provider == "groq":
+         body["reasoning_effort"] = "low"  # reasoning models spend tokens thinking before the JSON
++    if provider == "openrouter":
++        body["reasoning"] = {"effort": "low"}  # OpenRouter-normalized; models without reasoning ignore it
+     data = _post(f"{base}/chat/completions", key, timeout, json=body)
+-    content = (data.get("choices") or [{}])[0].get("message", {}).get("content")
++    choice = (data.get("choices") or [{}])[0]
++    content = choice.get("message", {}).get("content")
++    if choice.get("finish_reason") == "length":
++        raise LLMError("Model output was cut off (finish_reason=length): reasoning used the token budget; raise max_tokens or use a non-reasoning model")
+     if not content:
+         raise LLMError("Empty model response")
+     return _loads(content)
+@@ -95,4 +100,4 @@
+     mime, raw = _shrink_image(path)
+     uri = f"data:{mime};base64,{base64.b64encode(raw).decode()}"
+     content = [{"type": "text", "text": prompt}, {"type": "image_url", "image_url": {"url": uri}}]
+-    return chat_json("openrouter", config.VISION_MODEL, "You transcribe documents. Return only JSON.", content, 3000, 90)
++    return chat_json("openrouter", config.VISION_MODEL, "You transcribe documents. Return only JSON.", content, 8000, 120)

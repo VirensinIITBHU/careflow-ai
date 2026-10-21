@@ -1,0 +1,47 @@
+{"id": "en-not-breathing", "lang": "en", "text": "The baby is not breathing.", "expect": "current:breathing_difficulty"}
+{"id": "en-not-able-breathe", "lang": "en", "text": "I am not able to breathe right now.", "expect": "current:breathing_difficulty"}
+{"id": "en-no-relief-chest", "lang": "en", "text": "No relief from chest pain since morning.", "expect": "current:chest_pain"}
+{"id": "en-earlier-today-chest", "lang": "en", "text": "My chest pain started earlier today.", "expect": "current:chest_pain"}
+{"id": "en-conjunct-negation", "lang": "en", "text": "No fever and I have chest pain.", "expect": "current:chest_pain"}
+{"id": "en-no-chest-pain", "lang": "en", "text": "I have no chest pain today.", "expect": "context:chest_pain"}
+{"id": "en-current-breath-after-negated", "lang": "en", "text": "No fever, but I am struggling to breathe.", "expect": "current:breathing_difficulty"}
+{"id": "en-current-blood-after-negated", "lang": "en", "text": "No fever and I noticed blood in my stool.", "expect": "current:blood_in_vomit_or_stool"}
+{"id": "hi-blood-translit", "lang": "hi", "text": "स्टूल के अंदर ब्लड क्लोट्स हैं।", "expect": "current:blood_in_vomit_or_stool"}
+{"id": "hi-pain-translit", "lang": "hi", "text": "पेट में बहुत तेज़ पेन है।", "expect": "current:severe_pain"}
+{"id": "en-blue-lips", "lang": "en", "text": "His lips are turning blue and he is gasping.", "expect": "current:breathing_difficulty"}
+{"id": "hi-breath-difficulty", "lang": "hi", "text": "मुझे सांस लेने में तकलीफ हो रही है।", "expect": "current:breathing_difficulty"}
+{"id": "hi-breath-stopped", "lang": "hi", "text": "उसकी सांस रुक रही है।", "expect": "current:breathing_difficulty"}
+{"id": "hinglish-chest-tightness", "lang": "hinglish", "text": "Mere seene mein tightness hai.", "expect": "current:chest_pain"}
+{"id": "hi-chest-heavy", "lang": "hi", "text": "सीने में भारीपन महसूस हो रहा है।", "expect": "current:chest_pain"}
+{"id": "hinglish-face-droop", "lang": "hinglish", "text": "Mera mooh tedha ho gaya hai.", "expect": "current:stroke_signs"}
+{"id": "hi-speech-slurred", "lang": "hi", "text": "उनकी आवाज़ लड़खड़ा रही है।", "expect": "current:stroke_signs"}
+{"id": "en-poison-swallowed", "lang": "en", "text": "A child swallowed poison ten minutes ago.", "expect": "current:poisoning_overdose"}
+{"id": "hinglish-pesticide", "lang": "hinglish", "text": "Usne galti se pesticide pi liya.", "expect": "current:poisoning_overdose"}
+{"id": "hi-overdose", "lang": "hi", "text": "उसने दवा की बहुत सारी गोलियां ले लीं, ओवरडोज हो सकता है।", "expect": "current:poisoning_overdose"}
+{"id": "en-snake-bite", "lang": "en", "text": "My son was bitten by a snake.", "expect": "current:poisoning_overdose"}
+{"id": "hi-scorpion-bite", "lang": "hi", "text": "बिच्छू ने काट लिया है।", "expect": "current:poisoning_overdose"}
+{"id": "en-throat-closing", "lang": "en", "text": "My throat is closing after eating peanuts.", "expect": "current:anaphylaxis"}
+{"id": "en-tongue-swelling", "lang": "en", "text": "Her tongue is swelling after the new medicine.", "expect": "current:anaphylaxis"}
+{"id": "hi-throat-swelling", "lang": "hi", "text": "एलर्जी के बाद गले में सूजन है।", "expect": "current:anaphylaxis"}
+{"id": "hinglish-lips-swelling", "lang": "hinglish", "text": "Dawai ke baad hont sooj rahe hain.", "expect": "current:anaphylaxis"}
+{"id": "en-head-injury", "lang": "en", "text": "He hit his head and vomited afterwards.", "expect": "current:head_injury"}
+{"id": "hi-head-injury", "lang": "hi", "text": "गिरने से सिर में चोट लगी है।", "expect": "current:head_injury"}
+{"id": "hinglish-head-injury", "lang": "hinglish", "text": "Mere sar mein chot lagi hai.", "expect": "current:head_injury"}
+{"id": "en-no-injury", "lang": "en", "text": "I have a mild headache and no injury.", "expect": "none"}
+{"id": "en-poison-ivy-nearmiss", "lang": "en", "text": "I got a rash from poison ivy; no one swallowed anything.", "expect": "none"}
+{"id": "en-breathing-exercise", "lang": "en", "text": "Breathing exercises help my back pain.", "expect": "none"}
+{"id": "en-blood-test-nearmiss", "lang": "en", "text": "My blood test and stool test were normal.", "expect": "none"}
+{"id": "en-overdose-training", "lang": "en", "text": "The overdose protocol was discussed in training; nobody took extra tablets.", "expect": "none"}
+{"id": "en-old-head-injury", "lang": "en", "text": "I had a head injury several years ago, fully recovered.", "expect": "context:head_injury"}
+{"id": "en-past-poisoning", "lang": "en", "text": "I swallowed poison as a child, decades ago.", "expect": "context:poisoning_overdose"}
+{"id": "en-no-throat-swelling", "lang": "en", "text": "There is no throat swelling or tongue swelling.", "expect": "context:anaphylaxis"}
+{"id": "en-no-poison", "lang": "en", "text": "No one swallowed poison or pesticide.", "expect": "context:poisoning_overdose"}
+{"id": "en-past-chest", "lang": "en", "text": "I used to have chest pain, but it resolved years ago.", "expect": "context:chest_pain"}
+{"id": "en-negated-breath", "lang": "en", "text": "I am not having trouble breathing.", "expect": "context:breathing_difficulty"}
+{"id": "hi-negated-breath", "lang": "hi", "text": "मुझे सांस लेने में दिक्कत नहीं है।", "expect": "context:breathing_difficulty"}
+{"id": "en-bleeding-control", "lang": "en", "text": "The cut stopped bleeding yesterday and is now closed.", "expect": "context:severe_bleeding"}
+{"id": "en-no-severe-pain", "lang": "en", "text": "This is not severe pain.", "expect": "context:severe_pain"}
+{"id": "en-self-harm-current", "lang": "en", "text": "I feel there is no reason to live.", "expect": "current:self_harm"}
+{"id": "hinglish-self-harm", "lang": "hinglish", "text": "Mujhe jeene ka mann nahi karta.", "expect": "current:self_harm"}
+{"id": "en-fainting-history", "lang": "en", "text": "I fainted once as a teenager, not recently.", "expect": "context:loss_of_consciousness"}
+{"id": "en-no-confusion", "lang": "en", "text": "I am not confused and I recognize my family.", "expect": "context:confusion"}

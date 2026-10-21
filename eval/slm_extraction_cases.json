@@ -1,0 +1,10 @@
+[
+  {"id":"english_current","lang":"en","text":"I have chest pain since this morning.","evidence":"chest pain","status":"current","negated":false},
+  {"id":"english_denied","lang":"en","text":"I do not have shortness of breath, but I feel tired.","evidence":"shortness of breath","status":"current","negated":true},
+  {"id":"english_resolved","lang":"en","text":"I had a fever yesterday, but it has resolved now.","evidence":"fever","status":"resolved","negated":false},
+  {"id":"hinglish_current","lang":"hi-en","text":"Kal se saans lene mein dikkat ho rahi hai.","evidence":"saans lene mein dikkat","status":"current","negated":false},
+  {"id":"hindi_denied","lang":"hi","text":"मुझे सीने में दर्द नहीं है।","evidence":"सीने में दर्द","status":"current","negated":true},
+  {"id":"hindi_past","lang":"hi","text":"पिछले महीने बुखार था, अब ठीक है।","evidence":"बुखार","status":"resolved","negated":false},
+  {"id":"english_uncertain","lang":"en","text":"Maybe I felt dizzy last night, I am not sure.","evidence":"felt dizzy","status":"uncertain","negated":false},
+  {"id":"english_no_invention","lang":"en","text":"I am feeling okay today.","evidence":"","status":"none","negated":false}
+]
