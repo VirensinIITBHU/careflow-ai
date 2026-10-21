@@ -7,3 +7,6 @@ backend/data/uploads/*
 !backend/data/uploads/.gitkeep
 node_modules/
 dist/
+tmp
+samples/
+
