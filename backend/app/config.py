@@ -24,8 +24,8 @@ EXTRACT_FALLBACK_MODEL = env("EXTRACT_FALLBACK_MODEL", "openai/gpt-oss-20b")
 STT_PROVIDER = env("STT_PROVIDER", "groq")
 STT_MODEL = env("STT_MODEL", "whisper-large-v3")
 VISION_PROVIDER = env("VISION_PROVIDER", "openrouter")
-VISION_MODEL = env("VISION_MODEL", "nvidia/nemotron-3.5-content-safety:free")
-VISION_FALLBACK_MODEL = env("VISION_FALLBACK_MODEL", "nvidia/nemotron-nano-12b-v2-vl:free")
+VISION_MODEL = env("VISION_MODEL", "nvidia/nemotron-nano-12b-v2-vl:free")
+VISION_FALLBACK_MODEL = env("VISION_FALLBACK_MODEL", "google/gemma-3-27b-it:free")
 STT_LOW_CONF = float(env("STT_LOW_CONF", "0.55"))  # segments below this confidence are flagged
 SECOND_READER = env("SECOND_READER", "off").lower() == "on"
 SECOND_READER_PROVIDER = env("SECOND_READER_PROVIDER", "groq")
@@ -38,3 +38,20 @@ DEMO_PASSWORD = env("DEMO_PASSWORD", "careflow-demo")
 SESSION_TTL_HOURS = float(env("SESSION_TTL_HOURS", "8"))
 USERS = {"intake1": "intake", "reviewer1": "reviewer", "reviewer2": "reviewer", "admin1": "admin"}
 CORS_ORIGINS = [o.strip() for o in env("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",") if o.strip()]
+# Vercel preview deployments get unique hostnames; allow them with a regex, e.g. https://careflow-.*\.vercel\.app
+CORS_ORIGIN_REGEX = env("CORS_ORIGIN_REGEX") or None
+
+# Live interview copilot: a small, fast model suggests the next questions while intake is typing or speaking.
+# Deterministic rule-based questions are always returned first, so the copilot keeps working without a key.
+COPILOT_PROVIDER = env("COPILOT_PROVIDER", "groq")
+COPILOT_MODEL = env("COPILOT_MODEL", "llama-3.1-8b-instant")
+COPILOT_TIMEOUT = float(env("COPILOT_TIMEOUT", "8"))
+COPILOT_LLM = env("COPILOT_LLM", "on").lower() == "on"
+
+# Provider response cache for reliable demos: off | record | replay | auto (replay when cached, else live + record).
+LLM_CACHE = env("LLM_CACHE", "off").lower()
+LLM_CACHE_PATH = Path(env("LLM_CACHE_PATH", str(BASE / "data" / "llm_cache.jsonl")))
+
+# Seed synthetic demo cases on startup when the database is empty (useful on hosts with ephemeral disks).
+SEED_DEMO = env("SEED_DEMO", "off").lower() == "on"
+APP_VERSION = "2.0.0"

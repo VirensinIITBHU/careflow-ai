@@ -73,6 +73,11 @@ class Source(BaseModel):
     segments: Optional[list[dict]] = None   # audio: {start,end,c0,c1,conf,no_speech}
     pages: Optional[list[list[int]]] = None  # report PDF: [page, start, end]
     warnings: list[str] = Field(default_factory=list)
+    label: Optional[str] = None  # human label, e.g. "Answer to: When did the fever start?"
+    # Interview context: [{c0, c1, question}] marks which part of text answers which copilot question.
+    # Questions are metadata only: they are never part of `text`, so safety rules never screen them.
+    prompts: Optional[list[dict]] = None
+    pretranscribed: bool = False  # audio already transcribed during the live interview
 
 
 class Symptom(BaseModel):
@@ -111,6 +116,53 @@ class FollowUp(BaseModel):
     question: str
     reason: str
     question_local: Optional[str] = None  # machine translation into the patient's language
+
+
+class Question(BaseModel):
+    """A copilot question. Information-gathering only: never a diagnosis, advice or urgency."""
+    id: str
+    key: str                      # e.g. "onset:fever", "redflag:chest_pain", "model:3f2a"
+    kind: Literal["redflag", "gap", "opener", "model"]
+    origin: Literal["rules", "policy", "model"]
+    slot: Optional[str] = None
+    target: Optional[str] = None
+    text_en: str
+    text_local: Optional[str] = None
+    lang: str = "en"
+    reason: str = ""
+    priority: int = 50
+
+
+class Turn(BaseModel):
+    turn_id: str = Field(default_factory=lambda: new_id("tn"))
+    kind: Literal["statement", "answer"]
+    question: Optional[Question] = None
+    text: Optional[str] = None
+    modality: Literal["typed", "voice"] = "typed"
+    stored_name: Optional[str] = None
+    filename: Optional[str] = None
+    segments: Optional[list[dict]] = None
+    language: Optional[str] = None
+    confidence: Optional[float] = None
+    warnings: list[str] = Field(default_factory=list)
+    stt_ms: Optional[int] = None
+    at: str = Field(default_factory=now)
+
+
+class InterviewSession(BaseModel):
+    session_id: str = Field(default_factory=lambda: f"IV-{uuid4().hex[:10].upper()}")
+    created_by: str
+    created_at: str = Field(default_factory=now)
+    updated_at: str = Field(default_factory=now)
+    status: Literal["active", "submitted", "discarded"] = "active"
+    consent: "Consent"
+    language_hint: Optional[str] = None
+    patient_ref: Optional[str] = None
+    turns: list[Turn] = Field(default_factory=list)
+    skipped: list[str] = Field(default_factory=list)      # question keys
+    shown: dict[str, Question] = Field(default_factory=dict)  # every question suggested, by key
+    attachments: list[dict] = Field(default_factory=list)  # {source_id, filename, stored_name}
+    case_id: Optional[str] = None
 
 
 class Stage(BaseModel):
@@ -171,6 +223,10 @@ class Case(BaseModel):
     referral: Optional[Referral] = None
     annotations: list[Annotation] = Field(default_factory=list)
     reviewed_at: Optional[str] = None
+    # Live interview record: [{question: Question, status: answered|skipped|suggested, source_id, start, end}]
+    interview: list[dict] = Field(default_factory=list)
+    interview_session_id: Optional[str] = None
+    processed_at: Optional[str] = None
 
     @computed_field
     @property
@@ -212,3 +268,6 @@ def compute_tier(case: Case) -> str:
     if best == "standard" and (case.extraction_failed or not any(s.text for s in case.sources)):
         return "undetermined"
     return best
+
+
+InterviewSession.model_rebuild()

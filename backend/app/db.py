@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Callable, Optional
 
 from . import config
-from .schemas import TIER_RANK, Case, now
+from .schemas import TIER_RANK, Case, InterviewSession, now
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS cases(
@@ -20,6 +20,9 @@ CREATE TABLE IF NOT EXISTS audit(
   seq INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT NOT NULL, actor TEXT NOT NULL, role TEXT NOT NULL,
   action TEXT NOT NULL, case_id TEXT, details TEXT NOT NULL, prev_hash TEXT NOT NULL, hash TEXT NOT NULL);
 CREATE INDEX IF NOT EXISTS idx_audit_case ON audit(case_id);
+CREATE TABLE IF NOT EXISTS interview_sessions(
+  session_id TEXT PRIMARY KEY, created_by TEXT NOT NULL, status TEXT NOT NULL,
+  created_at TEXT NOT NULL, updated_at TEXT NOT NULL, doc TEXT NOT NULL);
 """
 
 
@@ -121,3 +124,20 @@ def session_user(token: str) -> Optional[sqlite3.Row]:
 
 def delete_session(c: sqlite3.Connection, token: str) -> None:
     c.execute("DELETE FROM sessions WHERE token=?", (token,))
+
+
+def get_session(c: sqlite3.Connection, session_id: str) -> Optional[InterviewSession]:
+    row = c.execute("SELECT doc FROM interview_sessions WHERE session_id=?", (session_id,)).fetchone()
+    return InterviewSession.model_validate_json(row["doc"]) if row else None
+
+
+def put_session(c: sqlite3.Connection, s: InterviewSession) -> None:
+    s.updated_at = now()
+    c.execute(
+        "INSERT INTO interview_sessions(session_id,created_by,status,created_at,updated_at,doc) VALUES(?,?,?,?,?,?) "
+        "ON CONFLICT(session_id) DO UPDATE SET status=excluded.status, updated_at=excluded.updated_at, doc=excluded.doc",
+        (s.session_id, s.created_by, s.status, s.created_at, s.updated_at, s.model_dump_json()))
+
+
+def all_cases(c: sqlite3.Connection) -> list[Case]:
+    return [Case.model_validate_json(r["doc"]) for r in c.execute("SELECT doc FROM cases WHERE status != 'withdrawn'")]
