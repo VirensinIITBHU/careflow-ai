@@ -30,7 +30,7 @@ export function WakeBanner() {
     <div className={clsx('flex items-center justify-center gap-2 px-4 py-2 text-center text-[13px]', h.phase === 'down' ? 'bg-immsoft text-imm' : 'bg-urgsoft text-urg')}>
       {h.phase === 'waking'
         ? <><span className="h-2 w-2 animate-pulse rounded-full bg-urg" />The server is waking up from sleep ({h.waitedS}s). Free hosting pauses idle servers; this usually takes under a minute.</>
-        : <>Cannot reach the server. Check the API URL (VITE_API_BASE_URL) and that the backend is running.</>}
+        : <><span className="h-2 w-2 animate-pulse rounded-full bg-imm" />Still trying to reach the server ({h.waitedS}s). If this persists, check that the backend is running and VITE_API_BASE_URL points to it.</>}
     </div>
   )
 }
