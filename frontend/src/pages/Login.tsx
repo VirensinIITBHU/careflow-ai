@@ -8,9 +8,9 @@ import { msg } from '../lib/api'
 import { homeFor, useAuth } from '../lib/auth'
 
 const ROLES = [
-  { u: 'intake1', role: 'Intake', icon: <AudioLines className="h-5 w-5" />, text: 'Run a live interview. The copilot asks the next question as you type or speak.' },
-  { u: 'reviewer1', role: 'Reviewer', icon: <ClipboardCheck className="h-5 w-5" />, text: 'Work the prioritized queue. Every claim links back to the words it came from.' },
-  { u: 'admin1', role: 'Admin', icon: <UserCog className="h-5 w-5" />, text: 'Everything a reviewer can do, plus the hash-chained audit log.' },
+  { u: 'intake1', role: 'Intake', icon: <AudioLines className="h-5 w-5" />, text: 'Take a patient history by typing or voice, with suggested questions.' },
+  { u: 'reviewer1', role: 'Reviewer', icon: <ClipboardCheck className="h-5 w-5" />, text: 'Review submitted cases, check the source, and approve or reject.' },
+  { u: 'admin1', role: 'Admin', icon: <UserCog className="h-5 w-5" />, text: 'Reviewer access plus the audit log.' },
 ]
 
 function DemoConversation() {
@@ -21,12 +21,12 @@ function DemoConversation() {
         Mujhe kal se <mark className="rounded bg-amber-300/30 px-0.5 text-white">bukhar</mark> hai aur aaj subah se <mark className="rounded bg-red-400/30 px-0.5 text-white">saans lene mein dikkat</mark> ho rahi hai.
       </div>
       <div className="ml-8 animate-rise rounded-2xl rounded-br-sm bg-white px-4 py-3 text-slate-900 shadow-pop" style={{ animationDelay: '.6s' }}>
-        <div className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-red-700"><Sparkles className="h-3 w-3" />Ask next · warning sign</div>
+        <div className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-red-700"><Sparkles className="h-3 w-3" />Ask next</div>
         <div className="font-medium">Kya saans ki takleef abhi bhi ho rahi hai, aaram karte waqt bhi?</div>
         <div className="mt-0.5 text-slate-500">Is the breathing difficulty happening right now, even while resting?</div>
       </div>
       <div className="flex animate-rise flex-wrap gap-1.5 pl-1" style={{ animationDelay: '1.1s' }}>
-        {['fever · since yesterday', 'breathing difficulty', 'Brief 38% complete'].map((t, i) =>
+        {['fever · since yesterday', 'breathing difficulty'].map((t, i) =>
           <span key={t} className={clsx('rounded-full border px-2.5 py-1 text-xs', i === 1 ? 'border-red-300/40 bg-red-400/15 text-red-100' : 'border-white/15 bg-white/5 text-white/80')}>{t}</span>)}
       </div>
     </div>
@@ -53,17 +53,17 @@ export default function Login() {
           <Logo className="relative [&>span]:text-white" />
           <div className="relative mt-auto">
             <h1 className="max-w-lg font-display text-[44px] font-semibold leading-[1.05] tracking-tight">
-              Speak in any language.<br /><span className="text-teal-300">Every sentence has a receipt.</span>
+              Patient intake in Hindi,<br /><span className="text-teal-300">Hinglish and English.</span>
             </h1>
             <p className="mt-4 max-w-md text-[15px] leading-relaxed text-white/70">
-              A live interview copilot asks the right next question while the patient is still talking, then hands
-              clinicians an evidence-linked brief where every claim points back to the exact words, audio second or report page.
+              Intake staff get suggested questions while they take a history. Reviewers see a short summary next to the patient's
+              own words, so every point can be checked against what was actually said.
             </p>
             <DemoConversation />
             <div className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-[13px] text-white/60">
               <span className="flex items-center gap-1.5"><Languages className="h-4 w-4" />English · Hindi · Hinglish</span>
-              <span className="flex items-center gap-1.5"><FileSearch className="h-4 w-4" />Quotes verified against source</span>
-              <span className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4" />AI can raise priority, never lower it</span>
+              <span className="flex items-center gap-1.5"><FileSearch className="h-4 w-4" />Linked to the source</span>
+              <span className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4" />A person makes every decision</span>
             </div>
           </div>
         </section>
@@ -71,8 +71,8 @@ export default function Login() {
         <section className="flex items-center justify-center p-6 sm:p-10">
           <div className="w-full max-w-md">
             <Logo className="mb-8 lg:hidden" />
-            <h2 className="font-display text-3xl font-semibold tracking-tight">Welcome back</h2>
-            <p className="mt-1 text-sm text-mute">Pick a demo role to jump in, or sign in below.</p>
+            <h2 className="font-display text-3xl font-semibold tracking-tight">Sign in</h2>
+            <p className="mt-1 text-sm text-mute">Choose a demo account, or enter your details.</p>
             <div className="mt-6 space-y-2.5">
               {ROLES.map(r => (
                 <button key={r.u} onClick={() => go(r.u, 'careflow-demo')} disabled={!!busy}
@@ -90,7 +90,7 @@ export default function Login() {
               {err && <Callout tone="danger">{err}</Callout>}
               <Button type="submit" className="w-full" size="lg" loading={busy === u && !!u}>Sign in</Button>
             </form>
-            <p className="mt-8 text-center text-xs leading-relaxed text-mute">Demo accounts, not real identity verification. Synthetic data only. CareFlow AI does not diagnose, treat or decide.</p>
+            <p className="mt-8 text-center text-xs leading-relaxed text-mute">Demo accounts only. Use made-up patient details. Not for clinical use.</p>
           </div>
         </section>
       </div>

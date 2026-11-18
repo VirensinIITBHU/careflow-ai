@@ -1,12 +1,12 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import clsx from 'clsx'
 import {
-  AlertOctagon, ArrowRight, Bot, CheckCircle2, ChevronRight, CircleSlash, FileUp, Keyboard, Languages, ListChecks, Loader2,
+  AlertOctagon, ArrowRight, Bot, CheckCircle2, ChevronRight, CircleSlash, FileText, Keyboard, Languages, ListChecks, Loader2,
   Mic, MicOff, Paperclip, Send, ShieldAlert, Sparkles, Square, Trash2, Undo2, Wifi, WifiOff, X,
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Badge, Button, Callout, Card, Empty, Field, Input, Kbd, Ring, Select, Skeleton, Spinner, Textarea, useDialog, useToast } from '../../components/ui'
+import { Badge, Button, Callout, Card, Empty, Field, Input, Ring, Select, Skeleton, Spinner, useDialog, useToast } from '../../components/ui'
 import { api, events, msg } from '../../lib/api'
 import type { Case, Question, Session, Suggestions, Turn } from '../../lib/api'
 import { ago, langName, secs, STAGE_LABEL, STATUS_LABEL } from '../../lib/format'
@@ -16,7 +16,7 @@ import { useRecorder } from './useRecorder'
 type SessionResp = { session: Session; suggestions: Suggestions | null; turn?: Turn }
 
 const ORIGIN: Record<Question['origin'], { label: string; tone: 'imm' | 'brand' | 'und' }> = {
-  policy: { label: 'Warning-sign policy', tone: 'imm' }, rules: { label: 'Missing detail', tone: 'brand' }, model: { label: 'AI suggestion', tone: 'und' },
+  policy: { label: 'Warning sign', tone: 'imm' }, rules: { label: 'Missing info', tone: 'brand' }, model: { label: 'Suggested', tone: 'und' },
 }
 
 export default function Interview() {
@@ -39,9 +39,9 @@ function StartScreen() {
   return (
     <div className="mx-auto grid max-w-6xl gap-6 p-4 sm:p-8 lg:grid-cols-[1.2fr_1fr]">
       <div>
-        <p className="label">Live interview</p>
-        <h1 className="mt-1 font-display text-[34px] font-semibold leading-tight tracking-tight">Start a guided interview</h1>
-        <p className="mt-2 max-w-xl text-[15px] text-mute">Type or speak what the patient says. The copilot suggests the next question instantly, in the patient's language, and tracks what a clinician still needs to know.</p>
+        <p className="label">Intake</p>
+        <h1 className="mt-1 font-display text-[34px] font-semibold leading-tight tracking-tight">New interview</h1>
+        <p className="mt-2 max-w-xl text-[15px] text-mute">Type or record what the patient says. You'll get suggested questions as you go, in the patient's language.</p>
         <Card className="mt-6 p-5">
           <ol className="space-y-5">
             <li className="flex gap-3">
@@ -75,12 +75,6 @@ function StartScreen() {
             </li>
           </ol>
         </Card>
-        <div className="mt-5 grid gap-3 text-sm sm:grid-cols-3">
-          {[[<Sparkles key="a" className="h-4 w-4" />, 'Instant questions', 'Rules answer in milliseconds; AI adds more a moment later.'],
-            [<Languages key="b" className="h-4 w-4" />, 'In their language', 'Questions shown in Hindi or Hinglish with English underneath.'],
-            [<ShieldAlert key="c" className="h-4 w-4" />, 'Warning signs first', 'Clarifying questions come from the clinician-editable policy.']].map(([icon, t, d]) => (
-            <div key={t as string} className="rounded-xl border border-line p-3"><div className="flex items-center gap-2 font-medium text-brand">{icon}<span className="text-ink">{t}</span></div><p className="mt-1 text-[13px] text-mute">{d}</p></div>))}
-        </div>
       </div>
       <MySubmissions />
     </div>
@@ -179,7 +173,7 @@ function LiveInterview({ sessionId }: { sessionId: string }) {
 
   const attach = async (f: File) => {
     const form = new FormData(); form.append('report', f)
-    try { update(await api<SessionResp>(`/intake/sessions/${sessionId}/attachments`, { method: 'POST', form })); toast('Report attached. It is read after submission.') } catch (e) { toast(msg(e), 'err') }
+    try { update(await api<SessionResp>(`/intake/sessions/${sessionId}/attachments`, { method: 'POST', form })); toast('Report added.') } catch (e) { toast(msg(e), 'err') }
   }
 
   const submit = async () => {
@@ -234,10 +228,9 @@ function LiveInterview({ sessionId }: { sessionId: string }) {
         <div className="flex min-h-[60vh] min-w-0 flex-col xl:min-h-0">
           <div ref={thread} className="flex-1 space-y-4 overflow-y-auto px-4 py-6 scroll-thin sm:px-8">
             {!s.turns.length && <div className="mx-auto max-w-md pt-10 text-center"><div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-brandsoft text-brand"><Mic className="h-5 w-5" /></div>
-              <p className="font-medium">Ask the opening question, then type or record what the patient says.</p>
-              <p className="mt-1 text-sm text-mute">The copilot on the right updates as you type, before you even press send.</p></div>}
+              <p className="font-medium">Nothing recorded yet</p>
+              <p className="mt-1 text-sm text-mute">Start with the question on the right. Type or record what the patient says.</p></div>}
             {s.turns.map(t => <TurnBubble key={t.turn_id} t={t} onRemove={() => removeTurn(t)} />)}
-            {s.attachments.map(a => <div key={a.source_id} className="ml-auto flex w-fit items-center gap-2 rounded-lg border border-dashed border-line px-3 py-2 text-sm text-mute"><Paperclip className="h-4 w-4" />{a.filename}<span className="text-xs">· read after submission</span></div>)}
           </div>
 
           {/* composer */}
@@ -255,22 +248,26 @@ function LiveInterview({ sessionId }: { sessionId: string }) {
                 <Button variant="danger" size="sm" onClick={() => record()} loading={rec.state === 'stopping'} icon={<Square className="h-3.5 w-3.5" />}>Stop &amp; send</Button>
               </div>
             ) : (
-              <div className="flex items-end gap-2">
-                <Textarea ref={box} value={draft} rows={2} className="min-h-[52px] flex-1 text-[15px]" placeholder={answering ? 'Type the patient’s answer…' : 'Type what the patient says…'}
+              <div className="rounded-xl border border-line bg-panel shadow-card transition focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/20">
+                <textarea ref={box} value={draft} rows={2} aria-label="Patient's words"
+                  className="block max-h-48 min-h-[56px] w-full resize-none rounded-t-xl bg-transparent px-4 pt-3 text-[15px] leading-relaxed text-ink placeholder:text-mute/70 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                  placeholder={answering ? 'Type the answer…' : 'Type what the patient says…'}
                   onChange={e => { setDraft(e.target.value); cop.onDraft(e.target.value) }}
                   onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendText() } }} />
-                <div className="flex flex-col gap-1.5">
-                  <Button variant="secondary" aria-label="Record" title="Record (Alt+R)" onClick={() => record()} disabled={sending} className="h-[52px] w-12 px-0"><Mic className="h-5 w-5" /></Button>
+                <div className="flex flex-wrap items-center gap-2 px-2 pb-2 pt-1">
+                  <Button variant="ghost" size="sm" onClick={() => fileRef.current?.click()} disabled={s.attachments.length >= 3}
+                    title="Attach a lab report or prescription (PDF or image, up to 10 MB)" icon={<Paperclip className="h-4 w-4" />}>Add report</Button>
+                  <input ref={fileRef} type="file" hidden accept=".pdf,.png,.jpg,.jpeg,.webp" onChange={e => { const f = e.target.files?.[0]; if (f) attach(f); e.target.value = '' }} />
+                  {s.attachments.map(a => (
+                    <span key={a.source_id} title="Read after you send the case for review" className="inline-flex max-w-[200px] items-center gap-1.5 rounded-md border border-line bg-sunken px-2 py-1 text-xs">
+                      <FileText className="h-3.5 w-3.5 shrink-0 text-mute" /><span className="truncate">{a.filename}</span></span>))}
+                  <span className="ml-auto hidden text-[11.5px] text-mute md:inline">Enter to send</span>
+                  <Button variant="secondary" size="sm" aria-label="Record" title="Record (Alt+R)" onClick={() => record()} disabled={sending} className="h-9 w-9 px-0"><Mic className="h-4 w-4" /></Button>
+                  <Button size="sm" onClick={sendText} disabled={!draft.trim()} loading={sending} className="h-9" icon={<Send className="h-3.5 w-3.5" />}>Send</Button>
                 </div>
-                <Button onClick={sendText} disabled={!draft.trim()} loading={sending} className="h-[52px] px-4" icon={<Send className="h-4 w-4" />}><span className="hidden sm:inline">Send</span></Button>
               </div>
             )}
             {rec.error && <div className="mt-2 flex items-center gap-2 text-sm text-imm"><MicOff className="h-4 w-4" />{rec.error}</div>}
-            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11.5px] text-mute">
-              <span><Kbd>Enter</Kbd> send · <Kbd>Shift</Kbd>+<Kbd>Enter</Kbd> new line</span><span><Kbd>Alt</Kbd>+<Kbd>R</Kbd> record</span><span><Kbd>Alt</Kbd>+<Kbd>1–5</Kbd> pick question</span>
-              <button className="ml-auto inline-flex items-center gap-1 hover:text-ink" onClick={() => fileRef.current?.click()}><FileUp className="h-3.5 w-3.5" />Attach report</button>
-              <input ref={fileRef} type="file" hidden accept=".pdf,.png,.jpg,.jpeg,.webp" onChange={e => { const f = e.target.files?.[0]; if (f) attach(f); e.target.value = '' }} />
-            </div>
           </div>
         </div>
 
@@ -278,16 +275,16 @@ function LiveInterview({ sessionId }: { sessionId: string }) {
         <aside className="space-y-4 overflow-y-auto border-t border-line bg-sunken/40 p-4 scroll-thin xl:border-l xl:border-t-0">
           {warnings.length > 0 && (
             <div className="animate-rise rounded-xl border border-imm/40 bg-immsoft p-3.5">
-              <div className="flex items-center gap-2 text-sm font-semibold text-imm"><AlertOctagon className="h-4 w-4" />Possible warning sign</div>
+              <div className="flex items-center gap-2 text-sm font-semibold text-imm"><AlertOctagon className="h-4 w-4" />Warning sign mentioned</div>
               <ul className="mt-1.5 space-y-0.5 text-sm">{warnings.map(w => <li key={w.code}>{w.title.replace(' mentioned', '')} <span className="text-mute">· “{w.quote}”</span></li>)}</ul>
-              <p className="mt-2 text-[12.5px] text-mute">This case will be prioritized for clinician review. Ask the clarifying question first. If the patient seems unwell right now, follow your clinic's escalation process.</p>
+              <p className="mt-2 text-[12.5px] text-mute">Ask about this first. The case will go to the top of the review queue. If the patient looks unwell now, call a clinician.</p>
             </div>)}
 
           <div>
-            <div className="mb-2 flex items-center gap-2"><Sparkles className="h-4 w-4 text-brand" /><h2 className="text-sm font-semibold">Ask next</h2>
+            <div className="mb-2 flex items-center gap-2"><h2 className="text-sm font-semibold">Ask next</h2>
               <ModelStatus info={cop.modelInfo} thinking={cop.thinking} /></div>
             {!view ? <Skeleton className="h-36" /> : !top ? (
-              <Card className="p-4"><div className="flex items-center gap-2 text-sm"><CheckCircle2 className="h-4 w-4 text-std" />No open questions. Review the brief, then send for review.</div></Card>
+              <Card className="p-4"><div className="flex items-center gap-2 text-sm"><CheckCircle2 className="h-4 w-4 text-std" />All covered. Send the case for review when you're done.</div></Card>
             ) : (
               <QuestionCard q={top} primary onAnswer={() => pick(top)} onRecord={() => record(top)} onSkip={() => skip(top)} active={answering?.key === top.key} index={1} />
             )}
@@ -296,11 +293,11 @@ function LiveInterview({ sessionId }: { sessionId: string }) {
           <LiveBrief v={view} />
 
           {rest.length > 0 && <div>
-            <p className="label mb-2">Also consider</p>
+            <p className="label mb-2">Other questions</p>
             <div className="space-y-2">{rest.map((q, i) => <QuestionCard key={q.key} q={q} onAnswer={() => pick(q)} onRecord={() => record(q)} onSkip={() => skip(q)} active={answering?.key === q.key} index={i + 2} />)}</div>
           </div>}
 
-          <p className="px-1 text-[11.5px] leading-relaxed text-mute">Questions gather information only. They are not a diagnosis or advice. AI suggestions that diagnose, advise or reassure are blocked automatically.</p>
+          <p className="px-1 text-[11.5px] text-mute">Suggested questions only. Not medical advice.</p>
         </aside>
       </div>
     </div>
@@ -310,16 +307,16 @@ function LiveInterview({ sessionId }: { sessionId: string }) {
 const CornerTag = () => <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
 
 function ConnBadge({ conn, rtt }: { conn: string; rtt: number | null }) {
-  if (conn === 'live') return <Badge tone="std" title="Live WebSocket connection"><Wifi className="h-3 w-3" />Live{rtt != null && <span className="tabular-nums opacity-80">· {rtt} ms</span>}</Badge>
-  if (conn === 'http') return <Badge tone="urg" title="WebSocket unavailable; using HTTP"><WifiOff className="h-3 w-3" />HTTP fallback</Badge>
+  if (conn === 'live') return <Badge tone="std" title="Live WebSocket connection"><Wifi className="h-3 w-3" />Connected</Badge>
+  if (conn === 'http') return <Badge tone="urg" title="WebSocket unavailable; using HTTP"><WifiOff className="h-3 w-3" />Slow connection</Badge>
   return <Badge><Loader2 className="h-3 w-3 animate-spin" />Connecting</Badge>
 }
 
 function ModelStatus({ info, thinking }: { info: Suggestions['model'] | null; thinking: boolean }) {
-  if (thinking) return <span className="ml-auto flex items-center gap-1 text-[11.5px] text-und"><Bot className="h-3.5 w-3.5 animate-pulse" />AI thinking…</span>
-  if (!info || info.status === 'off') return <span className="ml-auto text-[11.5px] text-mute" title="No AI provider key is configured on the server; instant rule questions still work.">Rules only · AI not configured</span>
-  if (info.status === 'error') return <span className="ml-auto text-[11.5px] text-urg" title={info.error}>AI unavailable · rules only</span>
-  if (info.status === 'ok') return <span className="ml-auto text-[11.5px] text-mute">AI · {info.cached ? 'cached' : secs(info.ms)}{info.blocked ? ` · ${info.blocked} blocked` : ''}</span>
+  if (thinking) return <span className="ml-auto flex items-center gap-1 text-[11.5px] text-und"><Bot className="h-3.5 w-3.5 animate-pulse" />Finding more questions…</span>
+  if (!info || info.status === 'off') return <span className="ml-auto text-[11.5px] text-mute" title="No model key is set on the server.">Basic questions only</span>
+  if (info.status === 'error') return <span className="ml-auto text-[11.5px] text-urg" title={info.error}>Extra suggestions unavailable</span>
+  if (info.status === 'ok') return null
   return null
 }
 
@@ -332,15 +329,14 @@ function QuestionCard({ q, primary, onAnswer, onRecord, onSkip, active, index }:
       <div className="flex items-center gap-1.5">
         <Badge tone={o.tone}>{q.kind === 'redflag' && <ShieldAlert className="h-3 w-3" />}{q.origin === 'model' && <Bot className="h-3 w-3" />}{o.label}</Badge>
         {q.slot && q.kind === 'gap' && <span className="text-[11px] text-mute">{q.slot}</span>}
-        <span className="ml-auto"><Kbd>Alt {index}</Kbd></span>
       </div>
       <button onClick={onAnswer} className="mt-2 block w-full text-left">
         <p lang={q.lang === 'hi' ? 'hi' : undefined} className={clsx('font-medium leading-snug', primary ? 'text-[19px]' : 'text-[14.5px]')}>{local ? q.text_local : q.text_en}</p>
         {local && <p className={clsx('mt-1 text-mute', primary ? 'text-sm' : 'text-[12.5px]')}>{q.text_en}</p>}
       </button>
-      {primary && q.reason && <p className="mt-2 text-[12.5px] text-mute">Why: {q.reason}</p>}
+      {primary && q.reason && <p className="mt-2 text-[12.5px] text-mute">{q.reason}</p>}
       <div className={clsx('mt-3 flex gap-1.5', !primary && 'opacity-80 group-hover:opacity-100')}>
-        <Button size="sm" variant={primary ? 'primary' : 'secondary'} onClick={onAnswer} icon={<Keyboard className="h-3.5 w-3.5" />}>Type answer</Button>
+        <Button size="sm" variant={primary ? 'primary' : 'secondary'} onClick={onAnswer} icon={<Keyboard className="h-3.5 w-3.5" />}>Answer</Button>
         <Button size="sm" variant="secondary" onClick={onRecord} icon={<Mic className="h-3.5 w-3.5" />}>Record</Button>
         <Button size="sm" variant="quiet" className="ml-auto" onClick={onSkip} icon={<CircleSlash className="h-3.5 w-3.5" />}>Skip</Button>
       </div>
@@ -355,17 +351,16 @@ function LiveBrief({ v }: { v: Suggestions | null }) {
     <Card className="p-4">
       <div className="flex items-center gap-3">
         <Ring pct={v.completeness.pct}>{v.completeness.pct}%</Ring>
-        <div><div className="flex items-center gap-1.5 text-sm font-semibold"><ListChecks className="h-4 w-4 text-mute" />Live brief</div>
-          <div className="text-xs text-mute">{v.completeness.filled} of {v.completeness.total} key details captured</div></div>
+        <div><div className="flex items-center gap-1.5 text-sm font-semibold"><ListChecks className="h-4 w-4 text-mute" />Checklist</div>
+          <div className="text-xs text-mute">{v.completeness.filled} of {v.completeness.total} covered</div></div>
       </div>
       {present.length + denied.length > 0 && <div className="mt-3 flex flex-wrap gap-1.5">
         {present.map(s => <span key={s.id} title={`“${s.quote}”${s.origin === 'model' ? ' · found by AI' : ''}`} className={clsx('animate-rise rounded-full border px-2 py-0.5 text-xs font-medium',
           s.warning ? 'border-imm/40 bg-immsoft text-imm' : 'border-brand/25 bg-brandsoft text-brand')}>{s.origin === 'model' && <Sparkles className="mr-0.5 inline h-3 w-3" />}{s.name}</span>)}
         {denied.map(s => <span key={s.id} title={`Denied, past or resolved: “${s.quote}”`} className="rounded-full border border-line px-2 py-0.5 text-xs text-mute line-through decoration-mute/60">{s.name}</span>)}
       </div>}
-      {v.completeness.missing.length > 0 && <div className="mt-3"><p className="label mb-1">Still missing</p>
+      {v.completeness.missing.length > 0 && <div className="mt-3"><p className="label mb-1">Not asked yet</p>
         <ul className="space-y-0.5 text-[13px] text-mute">{v.completeness.missing.slice(0, 6).map(m => <li key={m} className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-mute" />{m}</li>)}</ul></div>}
-      <p className="mt-3 border-t border-line pt-2 text-[11.5px] text-mute">Rules in {v.ms < 1 ? '<1' : v.ms} ms. Chips show what was said, not a diagnosis.</p>
     </Card>
   )
 }
@@ -378,9 +373,9 @@ function TurnBubble({ t, onRemove }: { t: Turn; onRemove: () => void }) {
         <span>{t.question.text_local ?? t.question.text_en}</span></div>}
       <div className={clsx('relative max-w-[85%] rounded-2xl px-4 py-2.5 text-[15px] leading-relaxed', t.question ? 'ml-6 rounded-tl-sm bg-brandsoft' : 'bg-brandsoft')}>
         <div className="mb-0.5 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wider text-brand">
-          {t.modality === 'voice' ? <Mic className="h-3 w-3" /> : <Keyboard className="h-3 w-3" />}Patient{t.modality === 'voice' && t.stt_ms != null && <span className="normal-case tracking-normal text-mute">· transcribed in {secs(t.stt_ms)}</span>}
+          {t.modality === 'voice' ? <Mic className="h-3 w-3" /> : <Keyboard className="h-3 w-3" />}Patient
         </div>
-        {t.text ? <p className="whitespace-pre-wrap">{t.text}</p> : <p className="italic text-mute">Recording saved; transcription pending.</p>}
+        {t.text ? <p className="whitespace-pre-wrap">{t.text}</p> : <p className="italic text-mute">Recording saved. Text will appear after review processing.</p>}
         {t.warnings.map(w => <p key={w} className="mt-1 text-xs text-urg">{w}</p>)}
         <button onClick={onRemove} aria-label="Remove this turn" title="Undo" className="absolute -right-9 top-1 rounded-lg p-1.5 text-mute opacity-0 transition hover:bg-sunken hover:text-ink group-hover:opacity-100 focus:opacity-100"><Undo2 className="h-4 w-4" /></button>
       </div>
@@ -400,7 +395,7 @@ function SubmittedView({ c }: { c: Case }) {
     <div className="mx-auto max-w-xl p-6 pt-14 text-center">
       <div className={clsx('mx-auto grid h-14 w-14 place-items-center rounded-full', done ? 'bg-stdsoft text-std' : 'bg-brandsoft text-brand')}>
         {done ? <CheckCircle2 className="h-7 w-7" /> : <Loader2 className="h-7 w-7 animate-spin" />}</div>
-      <h1 className="mt-4 font-display text-3xl font-semibold tracking-tight">{done ? 'Ready for clinician review' : 'Preparing the brief…'}</h1>
+      <h1 className="mt-4 font-display text-3xl font-semibold tracking-tight">{done ? 'Sent for review' : 'Processing…'}</h1>
       <p className="mt-2 text-mute">Case <code className="font-mono text-ink">{cur.case_id}</code> {done ? 'is in the review queue.' : 'is being processed. You can start the next interview now.'}</p>
       <Card className="mt-6 p-4 text-left">
         <ul className="space-y-2">{stages.length ? stages.map((st, i) => (

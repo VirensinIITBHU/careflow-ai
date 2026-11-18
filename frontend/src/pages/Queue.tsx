@@ -7,7 +7,6 @@ import { Badge, Button, Card, Empty, Input, Kbd, Skeleton, Tabs, TierBadge, useD
 import { api, events, msg } from '../lib/api'
 import type { QueueRow, Tier } from '../lib/api'
 import { ago, langName, STAGE_LABEL, TIER_META, TIER_RANK, TIERS } from '../lib/format'
-import { useAuth } from '../lib/auth'
 
 type TabId = 'needs_review' | 'in_review' | 'processing' | 'approved' | 'consulted' | 'rejected' | 'archived'
 const TABS: { id: TabId; label: string }[] = [
@@ -28,7 +27,6 @@ export function useLiveQueue() {
 
 export default function Queue() {
   const nav = useNavigate(), toast = useToast(), ask = useDialog(), qc = useQueryClient()
-  const { user } = useAuth()
   const [tab, setTab] = useState<TabId>('needs_review'), [tier, setTier] = useState<Tier | 'all'>('all'), [q, setQ] = useState(''), [cursor, setCursor] = useState(0)
   const search = useRef<HTMLInputElement>(null)
   const rows = useQuery({ queryKey: ['queue'], queryFn: () => api<QueueRow[]>('/cases'), refetchInterval: 30000 })
@@ -70,8 +68,8 @@ export default function Queue() {
   return (
     <div className="mx-auto max-w-7xl p-4 sm:p-8">
       <div className="flex flex-wrap items-end gap-4">
-        <div><p className="label">Review queue</p><h1 className="mt-1 font-display text-[32px] font-semibold tracking-tight">Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'}, {user?.username}</h1>
-          <p className="text-sm text-mute">Highest automated priority first, then longest waiting. Priority is a review aid, not a care decision.</p></div>
+        <div><p className="label">Review queue</p><h1 className="mt-1 font-display text-[32px] font-semibold tracking-tight">Cases to review</h1>
+          <p className="text-sm text-mute">Sorted by priority, then by waiting time.</p></div>
         <span className="ml-auto flex items-center gap-1.5 text-xs text-mute"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-std" />Live</span>
       </div>
 
@@ -90,7 +88,7 @@ export default function Queue() {
         <div className={clsx('card col-span-2 p-4 lg:col-span-1', unclaimedImm ? 'border-imm/40 bg-immsoft' : '')}>
           <div className="text-[12.5px] font-medium text-mute">Unclaimed immediate</div>
           <div className={clsx('mt-1 text-3xl font-semibold tabular-nums', unclaimedImm && 'text-imm')}>{rows.isLoading ? '–' : unclaimedImm}</div>
-          <div className="text-xs text-mute">{unclaimedImm ? 'need a reviewer now' : 'all claimed'}</div>
+          <div className="text-xs text-mute">{unclaimedImm ? 'not yet picked up' : 'none waiting'}</div>
         </div>
       </div>
 
@@ -109,7 +107,7 @@ export default function Queue() {
         {rows.isLoading ? <div className="space-y-2 p-4">{[0, 1, 2, 3].map(i => <Skeleton key={i} className="h-16" />)}</div>
           : rows.error ? <Empty icon={<Inbox className="h-5 w-5" />} title="Could not load the queue">{msg(rows.error)}</Empty>
           : !shown.length ? <Empty icon={<ClipboardList className="h-5 w-5" />} title={q || tier !== 'all' ? 'No matching cases' : 'Nothing here'}>
-            {tab === 'needs_review' ? 'New cases appear here automatically as intake submits them.' : 'Cases move here as they are reviewed.'}</Empty>
+            {tab === 'needs_review' ? 'New cases show up here when intake sends them.' : 'Nothing in this list yet.'}</Empty>
           : <ul className="divide-y divide-line">{shown.map((r, i) => (
             <li key={r.case_id} onMouseEnter={() => setCursor(i)}
               className={clsx('group relative flex cursor-pointer flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3.5 transition sm:flex-nowrap', i === cursor ? 'bg-sunken/70' : 'hover:bg-sunken/40')}
@@ -145,7 +143,7 @@ export default function Queue() {
               </div>
             </li>))}</ul>}
       </Card>
-      <p className="mt-3 text-xs text-mute"><Kbd>j</Kbd>/<Kbd>k</Kbd> move · <Kbd>Enter</Kbd> open · <Kbd>/</Kbd> search. “No warning sign found” never means the patient is safe.</p>
+      <p className="mt-3 text-xs text-mute"><Kbd>j</Kbd>/<Kbd>k</Kbd> move · <Kbd>Enter</Kbd> open · <Kbd>/</Kbd> search. </p>
     </div>
   )
 }
