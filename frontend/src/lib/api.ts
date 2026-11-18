@@ -72,6 +72,8 @@ export class ApiError extends Error { constructor(public status: number, m: stri
 let token = ''
 try { token = sessionStorage.getItem('cf_token') || '' } catch { /* storage blocked */ }
 let on401 = () => {}
+let onOk = () => {}
+export const setOnOk = (f: () => void) => { onOk = f }
 export const setOn401 = (f: () => void) => { on401 = f }
 export const setToken = (t: string) => {
   token = t
@@ -92,6 +94,7 @@ export async function api<T = any>(path: string, o: { method?: string; json?: un
     if (r.status === 401 && path !== '/auth/login') { setToken(''); on401() }
     throw new ApiError(r.status, m || `Request failed (${r.status})`)
   }
+  onOk()
   return r.json()
 }
 
