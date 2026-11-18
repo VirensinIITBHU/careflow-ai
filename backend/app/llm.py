@@ -8,7 +8,7 @@ from pathlib import Path
 
 import httpx
 
-from . import config
+from . import config, llm_cache
 
 
 class LLMError(RuntimeError):
@@ -77,6 +77,11 @@ def _chat_body(provider: str, model: str, system: str, user, max_tokens: int, js
 
 
 def chat_json(provider: str, model: str, system: str, user, max_tokens: int = 3000, timeout: float = 60) -> dict:
+    k = llm_cache.key("chat", provider, model, system, user, max_tokens)
+    return llm_cache.through(k, lambda: _chat_json_live(provider, model, system, user, max_tokens, timeout))
+
+
+def _chat_json_live(provider: str, model: str, system: str, user, max_tokens: int, timeout: float) -> dict:
     base, key = _provider(provider)
     try:
         data = _post(f"{base}/chat/completions", key, timeout,
@@ -100,6 +105,11 @@ def chat_json(provider: str, model: str, system: str, user, max_tokens: int = 30
 
 def transcribe(path: Path, model: str, language: str | None) -> dict:
     """Transcribe through a configured provider, normalizing output for the pipeline."""
+    k = llm_cache.key("stt", config.STT_PROVIDER, model, language, path.read_bytes())
+    return llm_cache.through(k, lambda: _transcribe_live(path, model, language))
+
+
+def _transcribe_live(path: Path, model: str, language: str | None) -> dict:
     if config.STT_PROVIDER == "huggingface":
         _, key = _provider("huggingface")
         raw = base64.b64encode(path.read_bytes()).decode("ascii")
@@ -149,10 +159,15 @@ def vision_json(prompt: str, path: Path, model: str | None = None) -> dict:
     """Send an image + prompt to the configured vision provider. Returns {"text", "illegible_regions", "notes"}.
     Uses a plain chat call (no JSON mode, no reasoning flags): free OpenRouter vision endpoints often reject them.
     Raises LLMError if the model answered with a safety verdict instead of a transcription."""
+    provider, name = config.VISION_PROVIDER, model or config.VISION_MODEL
+    k = llm_cache.key("vision", provider, name, prompt, path.read_bytes())
+    return llm_cache.through(k, lambda: _vision_live(prompt, path, provider, name))
+
+
+def _vision_live(prompt: str, path: Path, provider: str, name: str) -> dict:
     mime, raw = _shrink_image(path)
     uri = f"data:{mime};base64,{base64.b64encode(raw).decode()}"
     content = [{"type": "text", "text": prompt}, {"type": "image_url", "image_url": {"url": uri}}]
-    provider, name = config.VISION_PROVIDER, model or config.VISION_MODEL
     base, key = _provider(provider)
     body = {"model": name, "temperature": 0, "max_tokens": 8000,
             "messages": [{"role": "system", "content": "You transcribe documents. Return only JSON."},

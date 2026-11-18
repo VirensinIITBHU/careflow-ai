@@ -1,3 +1,5 @@
+> **Historical (v1).** The frontend was rewritten in v2; see the README and docs/architecture.md for the current product.
+
 # CareFlow AI - Architecture Diagram Brief for Claude
 
 > **Purpose:** Give Claude an accurate, implementation-based brief for producing a clear architecture diagram of the current CareFlow AI prototype for a mentor review. This brief distinguishes implemented behavior from the model migration roadmap so the presentation does not imply future work is already live.

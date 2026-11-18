@@ -1,3 +1,5 @@
+> **Historical (v1).** The frontend was rewritten in v2; see the README and docs/architecture.md for the current product.
+
 # Frontend product brief and current implementation
 
 Use this document to orient future UI work. The current app is a React + TypeScript + Vite frontend in frontend/; it is already implemented. Keep the API and safety boundaries below in view when changing it.

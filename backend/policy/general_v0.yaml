@@ -9,6 +9,11 @@ categories:
     tier: immediate
     title: Breathing difficulty mentioned
     rationale: Difficulty breathing is a general warning sign that needs prompt human review.
+    # Clarifying question shown to intake by the live copilot when this sign is mentioned (not a diagnosis).
+    ask:
+      en: "Is the breathing difficulty happening right now, even while resting?"
+      hinglish: "Kya saans ki takleef abhi bhi ho rahi hai, aaram karte waqt bhi?"
+      hi: "क्या सांस की तकलीफ़ अभी भी हो रही है, आराम करते समय भी?"
     terms:
       - difficulty breathing
       - difficulty in breathing
@@ -67,6 +72,11 @@ categories:
     tier: immediate
     title: Chest pain or pressure mentioned
     rationale: Chest pain or pressure is a general warning sign that needs prompt human review.
+    # Clarifying question shown to intake by the live copilot when this sign is mentioned (not a diagnosis).
+    ask:
+      en: "Is the chest pain present right now, and does it spread to the arm, jaw or back?"
+      hinglish: "Kya seene ka dard abhi ho raha hai, aur kya yeh baanh, jabde ya peeth tak jaata hai?"
+      hi: "क्या सीने में दर्द अभी हो रहा है, और क्या यह बांह, जबड़े या पीठ तक जाता है?"
     terms:
       - chest pain
       - chest tightness
@@ -105,6 +115,11 @@ categories:
     tier: immediate
     title: Fainting or loss of consciousness mentioned
     rationale: Fainting or unresponsiveness is a general warning sign that needs prompt human review.
+    # Clarifying question shown to intake by the live copilot when this sign is mentioned (not a diagnosis).
+    ask:
+      en: "When did the fainting happen, and is the patient fully awake and alert now?"
+      hinglish: "Behoshi kab hui thi, aur kya patient abhi poori tarah hosh mein hai?"
+      hi: "बेहोशी कब हुई थी, और क्या मरीज़ अभी पूरी तरह होश में है?"
     terms:
       - fainted
       - fainting
@@ -132,6 +147,11 @@ categories:
     tier: immediate
     title: Possible stroke-like signs mentioned
     rationale: Sudden one-sided weakness, face drooping or speech trouble need prompt human review.
+    # Clarifying question shown to intake by the live copilot when this sign is mentioned (not a diagnosis).
+    ask:
+      en: "When exactly did the weakness, face drooping or speech change start? Is it still present?"
+      hinglish: "Kamzori, chehra latakna ya bolne mein dikkat theek kab shuru hui? Kya abhi bhi hai?"
+      hi: "कमज़ोरी, चेहरा लटकना या बोलने में दिक्कत ठीक कब शुरू हुई? क्या अभी भी है?"
     terms:
       - face drooping
       - drooping face
@@ -162,6 +182,11 @@ categories:
     tier: immediate
     title: Heavy bleeding mentioned
     rationale: Heavy or uncontrolled bleeding needs prompt human review.
+    # Clarifying question shown to intake by the live copilot when this sign is mentioned (not a diagnosis).
+    ask:
+      en: "Is the bleeding still going on right now, and roughly how much?"
+      hinglish: "Kya khoon abhi bhi beh raha hai, aur lagbhag kitna?"
+      hi: "क्या खून अभी भी बह रहा है, और लगभग कितना?"
     terms:
       - heavy bleeding
       - bleeding heavily
@@ -187,6 +212,11 @@ categories:
     tier: immediate
     title: Seizure or convulsion mentioned
     rationale: Seizures or convulsions need prompt human review.
+    # Clarifying question shown to intake by the live copilot when this sign is mentioned (not a diagnosis).
+    ask:
+      en: "When did the fit happen, how long did it last, and has the patient fully woken up since?"
+      hinglish: "Daura kab pada, kitni der tak raha, aur kya patient uske baad poori tarah hosh mein aaya?"
+      hi: "दौरा कब पड़ा, कितनी देर तक रहा, और क्या मरीज़ उसके बाद पूरी तरह होश में आया?"
     terms:
       - seizure
       - convulsion
@@ -211,6 +241,11 @@ categories:
     tier: immediate
     title: Possible self-harm or suicidal wording
     rationale: Wording about self-harm or ending life needs prompt, careful human review.
+    # Clarifying question shown to intake by the live copilot when this sign is mentioned (not a diagnosis).
+    ask:
+      en: "Are you having thoughts of hurting yourself right now? Are you safe at this moment?"
+      hinglish: "Kya aapke mann mein abhi khud ko nuksan pahunchane ke vichar aa rahe hain? Kya aap is waqt surakshit hain?"
+      hi: "क्या आपके मन में अभी खुद को नुकसान पहुँचाने के विचार आ रहे हैं? क्या आप इस समय सुरक्षित हैं?"
     terms:
       - kill myself
       - end my life
@@ -256,6 +291,11 @@ categories:
     tier: urgent
     title: Confusion or disorientation mentioned
     rationale: New confusion or disorientation should be reviewed soon by a human.
+    # Clarifying question shown to intake by the live copilot when this sign is mentioned (not a diagnosis).
+    ask:
+      en: "When did the confusion start, and is it getting worse?"
+      hinglish: "Uljhan kab se hai, aur kya yeh badh rahi hai?"
+      hi: "भ्रम कब से है, और क्या यह बढ़ रहा है?"
     terms:
       - confused
       - confusion
@@ -273,6 +313,11 @@ categories:
     tier: immediate
     title: Poisoning, overdose or venomous bite mentioned
     rationale: Possible poisoning, overdose, or venomous bite needs prompt human review.
+    # Clarifying question shown to intake by the live copilot when this sign is mentioned (not a diagnosis).
+    ask:
+      en: "What was taken, how much, and how long ago?"
+      hinglish: "Kya liya gaya, kitna, aur kitni der pehle?"
+      hi: "क्या लिया गया, कितना, और कितनी देर पहले?"
     terms:
       - swallowed poison
       - drank poison
@@ -310,6 +355,11 @@ categories:
     tier: immediate
     title: Possible severe allergic reaction mentioned
     rationale: Throat, tongue, face or lip swelling after exposure needs prompt human review.
+    # Clarifying question shown to intake by the live copilot when this sign is mentioned (not a diagnosis).
+    ask:
+      en: "Is there any swelling of the face, lips or tongue, or trouble breathing right now?"
+      hinglish: "Kya abhi chehre, hothon ya jeebh par soojan hai, ya saans lene mein dikkat hai?"
+      hi: "क्या अभी चेहरे, होंठों या जीभ पर सूजन है, या सांस लेने में दिक्कत है?"
     terms:
       - anaphylaxis
       - anaphylactic
@@ -336,6 +386,11 @@ categories:
     tier: urgent
     title: Head injury mentioned
     rationale: A recent head injury should be reviewed by a human, especially with vomiting or drowsiness.
+    # Clarifying question shown to intake by the live copilot when this sign is mentioned (not a diagnosis).
+    ask:
+      en: "When did the head injury happen, and has there been vomiting, drowsiness or fainting since?"
+      hinglish: "Sir mein chot kab lagi, aur kya uske baad ulti, neend jaisa lagna ya behoshi hui?"
+      hi: "सिर में चोट कब लगी, और क्या उसके बाद उल्टी, नींद आना या बेहोशी हुई?"
     terms:
       - head injury
       - head trauma
@@ -354,6 +409,11 @@ categories:
     tier: urgent
     title: Blood in vomit, stool or urine mentioned
     rationale: Blood in vomit, stool or urine should be reviewed soon by a human.
+    # Clarifying question shown to intake by the live copilot when this sign is mentioned (not a diagnosis).
+    ask:
+      en: "When did you first notice the blood, and how much was there?"
+      hinglish: "Khoon pehli baar kab dikha, aur kitna tha?"
+      hi: "खून पहली बार कब दिखा, और कितना था?"
     terms:
       - blood in vomit
       - vomiting blood
@@ -403,6 +463,11 @@ categories:
     tier: urgent
     title: Severe pain mentioned
     rationale: Severe or unbearable pain should be reviewed soon by a human.
+    # Clarifying question shown to intake by the live copilot when this sign is mentioned (not a diagnosis).
+    ask:
+      en: "Where exactly is the pain, when did it start, and is it constant?"
+      hinglish: "Dard theek kahan hai, kab shuru hua, aur kya lagatar hai?"
+      hi: "दर्द ठीक कहाँ है, कब शुरू हुआ, और क्या लगातार है?"
     terms:
       - unbearable pain
       - severe pain
