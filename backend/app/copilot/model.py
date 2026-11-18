@@ -6,6 +6,7 @@ questions that diagnose, advise, reassure or assign urgency are dropped, symptom
 conversation exactly, and duplicates of questions already asked or planned are removed."""
 import hashlib
 import json
+import logging
 import re
 import threading
 from collections import OrderedDict
@@ -38,6 +39,7 @@ _FORBIDDEN = re.compile(
     r"\b(urgent|immediately)\b",
     re.I)
 
+log = logging.getLogger("careflow.copilot")
 _lock = threading.Lock()
 _memo: "OrderedDict[str, dict]" = OrderedDict()
 
@@ -72,13 +74,15 @@ def suggest(conversation: list[dict], draft: str, lang: str, planned: list[str],
     t0 = time.time()
     try:
         out = llm.chat_json(config.COPILOT_PROVIDER, config.COPILOT_MODEL, SYSTEM, body,
-                            max_tokens=700, timeout=config.COPILOT_TIMEOUT)
+                            max_tokens=1500, timeout=config.COPILOT_TIMEOUT)
     except llm.LLMError as e:
+        log.warning("copilot model call failed (%s): %s", config.COPILOT_MODEL, str(e)[:300])
         if "is not set" in str(e):  # no provider key configured: rules-only mode, not an outage
             return {"questions": [], "symptoms": [], "status": "off", "ms": 0}
         return {"questions": [], "symptoms": [], "status": "error", "ms": int((time.time() - t0) * 1000),
                 "error": type(e).__name__}
     except Exception as e:  # the rules keep the copilot working
+        log.warning("copilot model call failed (%s): %s: %s", config.COPILOT_MODEL, type(e).__name__, str(e)[:300])
         return {"questions": [], "symptoms": [], "status": "error", "ms": int((time.time() - t0) * 1000),
                 "error": type(e).__name__}
     ms = int((time.time() - t0) * 1000)

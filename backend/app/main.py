@@ -1,4 +1,5 @@
 """CareFlow AI API. Synthetic-data demonstration; not for clinical use."""
+import logging
 import threading
 import time
 from contextlib import asynccontextmanager
@@ -11,6 +12,7 @@ from .routers import auth, cases, insights, intake, review
 from .safety.policy_loader import load as load_policy
 
 STARTED = time.time()
+logging.basicConfig(level=logging.INFO, format="%(levelname)s:     %(name)s: %(message)s")
 
 
 def _boot_tasks() -> None:

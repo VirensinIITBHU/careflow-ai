@@ -90,8 +90,7 @@ def analyse(texts: list[str], answered: set[str], skipped: set[str], hint: str |
         missing.append(f"clarify {L.WARNING_NAMES.get(f.code, {}).get('en', f.code)}")
         ask = cats[f.code].get("ask")
         if ask and want(key):
-            tpl = {**ask, "reason": "A possible warning sign was mentioned. Clarify whether it is happening now; "
-                                    "a clinician will review this case with priority."}
+            tpl = {**ask, "reason": "Warning sign mentioned. Check whether it is happening now."}
             questions.append(_question(key, "redflag", "policy", tpl, lang, i, slot="redflag", target=f.code))
 
     for i, e in enumerate(present[:6]):

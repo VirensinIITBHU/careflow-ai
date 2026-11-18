@@ -43,13 +43,13 @@ export default function Ops() {
   return (
     <div className="mx-auto max-w-7xl p-4 sm:p-8">
       <p className="label">Operations</p>
-      <h1 className="mt-1 font-display text-[32px] font-semibold tracking-tight">How the clinic is flowing</h1>
-      <p className="text-sm text-mute">Live from the case store. Synthetic demo data.</p>
+      <h1 className="mt-1 font-display text-[32px] font-semibold tracking-tight">Operations</h1>
+      <p className="text-sm text-mute">Demo data.</p>
       {q.isLoading ? <div className="mt-6 grid gap-3 sm:grid-cols-4">{[0, 1, 2, 3].map(i => <Skeleton key={i} className="h-28" />)}</div> : !m ? <Empty title="No metrics yet" /> : <>
         <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
           <Kpi icon={<Activity />} label="Open cases" value={openTotal} sub={<>{m.open_by_tier.immediate} immediate · {m.open_by_tier.urgent} urgent</>} tone={m.open_by_tier.immediate ? 'text-imm' : undefined} />
-          <Kpi icon={<Zap />} label="Submission → ready brief" value={m.seconds_to_ready.median != null ? secs(m.seconds_to_ready.median * 1000) : '–'} sub={`median of ${m.seconds_to_ready.count} cases`} />
-          <Kpi icon={<Timer />} label="Submission → decision" value={m.minutes_to_decision.median != null ? `${Math.round(m.minutes_to_decision.median)} min` : '–'} sub={`median of ${m.minutes_to_decision.count} decided`} />
+          <Kpi icon={<Zap />} label="Time to process" value={m.seconds_to_ready.median != null ? secs(m.seconds_to_ready.median * 1000) : '–'} sub={`median of ${m.seconds_to_ready.count} cases`} />
+          <Kpi icon={<Timer />} label="Time to decision" value={m.minutes_to_decision.median != null ? `${Math.round(m.minutes_to_decision.median)} min` : '–'} sub={`median of ${m.minutes_to_decision.count} decided`} />
           <Kpi icon={<Clock />} label="Oldest open case" value={`${Math.round(m.oldest_open_minutes)} min`} sub="waiting for review" tone={m.oldest_open_minutes > 60 ? 'text-urg' : undefined} />
         </div>
 
@@ -67,21 +67,20 @@ export default function Ops() {
               </div>))}</div>
           </Card>
           <Card className="p-5">
-            <h2 className="flex items-center gap-2 text-sm font-semibold"><MessagesSquare className="h-4 w-4 text-brand" />Live interview copilot</h2>
+            <h2 className="flex items-center gap-2 text-sm font-semibold"><MessagesSquare className="h-4 w-4 text-brand" />Interviews</h2>
             <div className="mt-3 grid grid-cols-2 gap-3">
-              <div><div className="text-2xl font-semibold tabular-nums">{m.interview.share}%</div><div className="text-xs text-mute">of cases via interview</div></div>
-              <div><div className="text-2xl font-semibold tabular-nums">{m.interview.avg_answered}</div><div className="text-xs text-mute">questions answered / case</div></div>
+              <div><div className="text-2xl font-semibold tabular-nums">{m.interview.share}%</div><div className="text-xs text-mute">of cases came from an interview</div></div>
+              <div><div className="text-2xl font-semibold tabular-nums">{m.interview.avg_answered}</div><div className="text-xs text-mute">questions answered per case</div></div>
             </div>
-            <p className="label mb-2 mt-5">Answered questions by source</p>
-            <Bars rows={[['policy', 'Warning-sign policy', 'bg-imm'], ['rules', 'Missing-detail rules', 'bg-brand'], ['model', 'AI suggestions', 'bg-und']].map(([k, l, t]) => ({ label: l, value: origins[k]?.answered ?? 0, tone: t }))} />
-            <p className="mt-4 text-xs text-mute">AI questions pass guardrails that block diagnosis, advice and reassurance.</p>
+            <p className="label mb-2 mt-5">Answered questions, by type</p>
+            <Bars rows={[['policy', 'Warning sign', 'bg-imm'], ['rules', 'Missing info', 'bg-brand'], ['model', 'Suggested', 'bg-und']].map(([k, l, t]) => ({ label: l, value: origins[k]?.answered ?? 0, tone: t }))} />
           </Card>
         </div>
 
         <div className="mt-4 grid gap-4 lg:grid-cols-3">
-          <Card className="p-5"><h2 className="flex items-center gap-2 text-sm font-semibold"><Gauge className="h-4 w-4 text-mute" />Pipeline stage latency (median)</h2>
+          <Card className="p-5"><h2 className="flex items-center gap-2 text-sm font-semibold"><Gauge className="h-4 w-4 text-mute" />Processing time per step (median)</h2>
             <div className="mt-4">{Object.keys(m.stage_ms).length ? <Bars rows={Object.entries(m.stage_ms).map(([k, v]) => ({ label: STAGE_LABEL[k] ?? k, value: v.median }))} fmt={n => secs(n)} /> : <p className="text-sm text-mute">No timings yet.</p>}</div></Card>
-          <Card className="p-5"><h2 className="flex items-center gap-2 text-sm font-semibold"><Bot className="h-4 w-4 text-mute" />Most frequent warning signs</h2>
+          <Card className="p-5"><h2 className="flex items-center gap-2 text-sm font-semibold"><Bot className="h-4 w-4 text-mute" />Common warning signs</h2>
             <div className="mt-4">{m.top_warning_signs.length ? <Bars tone="bg-imm" rows={m.top_warning_signs.map(w => ({ label: w.title.replace(' mentioned', ''), value: w.count }))} /> : <p className="text-sm text-mute">None.</p>}</div></Card>
           <Card className="p-5"><h2 className="flex items-center gap-2 text-sm font-semibold"><Languages className="h-4 w-4 text-mute" />Languages</h2>
             <div className="mt-4"><Bars tone="bg-und" rows={m.languages.map(l => ({ label: langName(l.language), value: l.count }))} /></div></Card>

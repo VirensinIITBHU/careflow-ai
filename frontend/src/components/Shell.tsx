@@ -15,7 +15,7 @@ export const Logo = ({ className }: { className?: string }) => (
 
 function ServerDot() {
   const h = useHealth()
-  const label = h.phase === 'up' ? `Connected · v${h.health?.version}` : h.phase === 'waking' ? `Server waking up… ${h.waitedS}s` : h.phase === 'down' ? 'Server unreachable' : 'Connecting…'
+  const label = h.phase === 'up' ? `Connected · v${h.health?.version}` : h.phase === 'waking' ? `Starting server… ${h.waitedS}s` : h.phase === 'down' ? 'Server unreachable' : 'Connecting…'
   return (
     <div className="flex items-center gap-2 text-xs text-mute" title={h.health ? `Policy ${h.health.policy_version}` : undefined}>
       <span className={clsx('h-2 w-2 rounded-full', h.phase === 'up' ? 'bg-std' : h.phase === 'down' ? 'bg-imm' : 'animate-pulse bg-urg')} />{label}
@@ -29,8 +29,8 @@ export function WakeBanner() {
   return (
     <div className={clsx('flex items-center justify-center gap-2 px-4 py-2 text-center text-[13px]', h.phase === 'down' ? 'bg-immsoft text-imm' : 'bg-urgsoft text-urg')}>
       {h.phase === 'waking'
-        ? <><span className="h-2 w-2 animate-pulse rounded-full bg-urg" />The server is waking up from sleep ({h.waitedS}s). Free hosting pauses idle servers; this usually takes under a minute.</>
-        : <><span className="h-2 w-2 animate-pulse rounded-full bg-imm" />Still trying to reach the server ({h.waitedS}s). If this persists, check that the backend is running and VITE_API_BASE_URL points to it.</>}
+        ? <><span className="h-2 w-2 animate-pulse rounded-full bg-urg" />Starting the server ({h.waitedS}s). This can take up to a minute after a quiet period.</>
+        : <><span className="h-2 w-2 animate-pulse rounded-full bg-imm" />Can't reach the server ({h.waitedS}s). Still retrying.</>}
     </div>
   )
 }
@@ -51,7 +51,7 @@ export default function Shell() {
     {user.role !== 'reviewer' && <Item to="/interview" icon={<MessagesSquare />}>Live interview</Item>}
     {staff && <Item to="/queue" icon={<ClipboardList />}>Review queue</Item>}
     {staff && <Item to="/ops" icon={<Activity />}>Operations</Item>}
-    {staff && <Item to="/trust" icon={<ShieldCheck />}>Trust &amp; safety</Item>}
+    {staff && <Item to="/trust" icon={<ShieldCheck />}>Safety checks</Item>}
     {user.role === 'admin' && <Item to="/audit" icon={<ScrollText />}>Audit log</Item>}
   </>
   return (
@@ -63,7 +63,7 @@ export default function Shell() {
           <nav className="mt-7 flex flex-col gap-1">{nav}</nav>
           <div className="mt-auto space-y-3">
             <div className="hidden rounded-lg border border-line bg-panel/70 p-2.5 text-[11.5px] leading-snug text-mute lg:block">
-              <b className="text-ink">Synthetic data only.</b> Not for clinical use. The AI organizes, asks and flags; people decide.
+              <b className="text-ink">Demo.</b> Use made-up patient details only. Not for clinical use.
             </div>
             <div className="hidden lg:block"><ServerDot /></div>
             <div className="flex items-center gap-2 rounded-lg px-1.5">
