@@ -144,6 +144,10 @@ def seed_if_empty() -> int:
                           "via": "interview" if session else "form", "seeded_demo": True})
         orchestrator.FIXTURES[case.case_id] = {"extraction": spec["extraction"], "text_en": spec.get("text_en")}
         orchestrator.run(case.case_id)
+
+        def ready(case, tx, minutes=spec["minutes"]):  # seeded cases were "submitted" in the past
+            case.processed_at = _ago(minutes - 0.15)
+        db.update(case.case_id, ready)
         made.append((case.case_id, spec))
     for case_id, spec in made:
         if spec.get("approve"):

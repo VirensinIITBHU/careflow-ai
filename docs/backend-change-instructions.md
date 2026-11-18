@@ -1,3 +1,5 @@
+> **Historical (v1).** The frontend was rewritten in v2; see the README and docs/architecture.md for the current product.
+
 # Backend implementation notes
 
 This file replaces the original coding-agent implementation prompt with a concise record of the current backend contract. The source code is authoritative if a detail here becomes outdated.

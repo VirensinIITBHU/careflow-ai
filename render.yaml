@@ -1,0 +1,38 @@
+# Render Blueprint for the CareFlow AI API (FastAPI). The frontend deploys separately on Vercel (frontend/vercel.json).
+# Secrets use `sync: false`: Render asks for them when the Blueprint is applied and never stores them in this file.
+services:
+  - type: web
+    name: careflow-api
+    runtime: python
+    rootDir: backend
+    plan: free                      # free instances sleep after ~15 min idle; the UI shows a "waking up" banner
+    region: singapore               # closest Render region to India
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      - key: GROQ_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: DEMO_PASSWORD
+        sync: false
+      # Your Vercel production URL, e.g. https://careflow-ai.vercel.app (comma-separate several).
+      - key: CORS_ORIGINS
+        sync: false
+      # Allow Vercel preview deployments, e.g. https://careflow-ai-.*\.vercel\.app
+      - key: CORS_ORIGIN_REGEX
+        sync: false
+      # The free plan's disk is wiped on every deploy/restart: re-seed synthetic demo cases when empty.
+      - key: SEED_DEMO
+        value: "on"
+      - key: SECOND_READER
+        value: "on"
+      - key: COPILOT_MODEL
+        value: llama-3.1-8b-instant
+      # Reuse provider answers for identical requests (faster, rate-limit friendly demos). Synthetic data only.
+      - key: LLM_CACHE
+        value: auto

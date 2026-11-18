@@ -140,13 +140,15 @@ def list_cases(user: User = Depends(require("reviewer", "admin"))):
         "needs_attention": _attention(x), "reviewer": x.reviewer_username,
         "consulted_at": x.consulted_at, "consulted_by": x.consulted_by,
         "consultation_note": x.consultation_note,
-        "consultation_note": x.consultation_note,
         "archived_at": x.archived_at, "archived_by": x.archived_by,
         "patient_ref": x.patient_ref, "source_kinds": [s.kind for s in x.sources],
         "override": x.tier_override.model_dump() if x.tier_override else None,
         "stage": x.stages[-1].name if x.stages else None,
         "top_flags": [f.title for f in sorted((f for f in x.flags if not f.resolved), key=lambda f: TIER_RANK[f.tier])][:3],
         "symptoms": [s.name for s in x.symptoms if not s.negated and s.status in ("current", "uncertain")][:4],
+        "warning_signs": [f.title for f in sorted((f for f in x.flags if f.kind == "safety" and not f.resolved),
+                                                  key=lambda f: TIER_RANK[f.tier])][:3],
+        "via_interview": bool(x.interview),
     } for x in cases]
 
 

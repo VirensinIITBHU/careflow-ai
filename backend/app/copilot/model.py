@@ -73,6 +73,11 @@ def suggest(conversation: list[dict], draft: str, lang: str, planned: list[str],
     try:
         out = llm.chat_json(config.COPILOT_PROVIDER, config.COPILOT_MODEL, SYSTEM, body,
                             max_tokens=700, timeout=config.COPILOT_TIMEOUT)
+    except llm.LLMError as e:
+        if "is not set" in str(e):  # no provider key configured: rules-only mode, not an outage
+            return {"questions": [], "symptoms": [], "status": "off", "ms": 0}
+        return {"questions": [], "symptoms": [], "status": "error", "ms": int((time.time() - t0) * 1000),
+                "error": type(e).__name__}
     except Exception as e:  # the rules keep the copilot working
         return {"questions": [], "symptoms": [], "status": "error", "ms": int((time.time() - t0) * 1000),
                 "error": type(e).__name__}

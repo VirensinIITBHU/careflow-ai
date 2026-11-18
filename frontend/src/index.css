@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: 246 244 239;
+  --panel: 255 254 251;
+  --sunken: 239 236 229;
+  --ink: 17 29 39;
+  --mute: 92 104 112;
+  --line: 223 218 208;
+  --brand: 13 111 120;
+  --brandsoft: 222 239 239;
+  --imm: 190 46 36;
+  --immsoft: 252 232 229;
+  --urg: 168 98 0;
+  --urgsoft: 252 241 220;
+  --und: 92 84 160;
+  --undsoft: 236 234 250;
+  --std: 26 122 92;
+  --stdsoft: 224 242 234;
+  --hl: 255 222 120;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: 13 18 23;
+  --panel: 20 27 34;
+  --sunken: 27 35 43;
+  --ink: 231 236 239;
+  --mute: 148 160 168;
+  --line: 44 54 63;
+  --brand: 64 190 196;
+  --brandsoft: 20 52 56;
+  --imm: 255 120 108;
+  --immsoft: 66 26 24;
+  --urg: 244 181 84;
+  --urgsoft: 60 42 14;
+  --und: 168 160 240;
+  --undsoft: 40 38 70;
+  --std: 96 204 160;
+  --stdsoft: 18 52 40;
+  --hl: 168 128 20;
+  color-scheme: dark;
+}
+
+@layer base {
+  html, body, #root { height: 100%; }
+  body {
+    @apply bg-bg text-ink font-sans antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  :focus-visible { @apply outline-none ring-2 ring-brand ring-offset-2 ring-offset-bg; }
+  ::selection { background: rgb(var(--hl) / 0.6); }
+  [lang='hi'], .deva { font-family: 'Noto Sans Devanagari', Inter, sans-serif; }
+}
+
+@layer components {
+  .card { @apply bg-panel border border-line rounded-xl shadow-card; }
+  .label { @apply text-[11px] font-semibold uppercase tracking-[0.08em] text-mute; }
+  .input {
+    @apply w-full rounded-lg border border-line bg-panel px-3 py-2 text-sm text-ink placeholder:text-mute/70
+           transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/25;
+  }
+  .scroll-thin { scrollbar-width: thin; scrollbar-color: rgb(var(--line)) transparent; }
+  .skeleton {
+    background: linear-gradient(90deg, rgb(var(--sunken)) 25%, rgb(var(--line)) 50%, rgb(var(--sunken)) 75%);
+    background-size: 200% 100%;
+    @apply animate-shimmer rounded-md;
+  }
+  mark.ev { @apply rounded-[3px] px-0.5 text-inherit cursor-pointer transition-colors; background: rgb(var(--hl) / 0.35); }
+  mark.ev:hover, mark.ev.active { background: rgb(var(--hl) / 0.9); }
+  mark.ev.active { @apply animate-flash ring-2 ring-urg/40; }
+  mark.ev.flag { box-shadow: inset 0 -2px 0 rgb(var(--imm)); }
+}

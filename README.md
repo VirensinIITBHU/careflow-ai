@@ -1,124 +1,140 @@
 # CareFlow AI
 
-**Evidence-linked intake and review for multilingual patient narratives.**
+**Speak in any language. Every sentence has a receipt.**
 
-CareFlow AI is a hackathon prototype that turns typed text, voice recordings, and report files into a source-linked summary and possible warning-sign flags for a human reviewer. Reviewers inspect original evidence, resolve flags, add a human note, and approve or reject cases.
+CareFlow AI is a voice-first, multilingual intake and review system for busy clinics. A **live interview copilot**
+suggests the next question while the patient is still talking, in Hindi, Hinglish or English. Clinicians then get an
+**evidence-linked brief** in which every extracted claim points back to the exact words, audio second or report page
+it came from.
 
-> **Synthetic data only. Not for clinical use.** CareFlow AI does not diagnose, recommend treatment, or make care decisions. Its warning rules are not clinically validated.
+> **Synthetic data only. Not for clinical use.** CareFlow AI does not diagnose, recommend treatment or make care
+> decisions. Its warning-sign rules are not clinically validated. A human reviewer makes every decision.
 
-## What the demo does
+## The problem
 
-1. Intake staff record consent and submit text, audio, and/or a report.
-2. Audio transcription and report reading run in the background; audio and report processing can run concurrently.
-3. Extraction, translation, rule-based screening, integrity checks, and follow-up questions prepare a draft for review.
-4. Reviewers trace findings to source text, audio timestamps, or report pages, then make the decision themselves.
-5. Approved cases can be marked **Consulted** with an optional consultation note. Reviewed cases can be archived and restored.
+In outpatient clinics across India, intake staff collect symptoms in a mix of languages. They do it under time
+pressure, often by voice, and with no guidance on what to ask. Clinicians then receive long, unstructured notes. Missing
+details (onset, severity, medicines, allergies) surface only during the consultation, and warning signs can sit
+unnoticed in a queue.
 
-The reviewer queue separates work into **To review**, **In review**, **Approved**, **Consulted**, **Archived**, **Rejected**, and **Processing**. Marking a case consulted moves it out of the pending Approved list. Archive is reversible and does not erase the case.
+## What CareFlow AI does
 
-## Safety and privacy boundaries
+| Moment | What happens |
+|---|---|
+| **1. Live interview** | The intake worker types or records what the patient says. The copilot updates **while they type** (about 5 ms round trip) with the next best question. Each question is shown in the patient's language with English underneath. |
+| **2. Warning signs first** | If something like breathing difficulty is mentioned, a red banner appears and the clarifying question from the **clinician-editable policy** comes first. |
+| **3. AI adds depth** | About 0.4 s later, a fast model suggests questions the rules can't think of, such as related symptoms or triggers. Guardrails block anything that diagnoses, advises or reassures. |
+| **4. Live brief** | A completeness ring and symptom chips show what has been captured and what is still missing, so the worker knows when the interview is done. |
+| **5. Evidence-linked review** | Reviewers see the original sources beside the brief. Hovering any symptom highlights its source span, and clicking an audio quote plays that second. Interview questions appear inline above the answers they produced. |
+| **6. "Why this tier?"** | One click shows exactly which rule matched which words, whether a model added anything, and any reviewer override. The system tier stays visible. |
+| **7. Human decision** | Approval requires a human note and every flag resolved with a reason. The AI draft stays separate and read-only. Everything is written to a hash-chained audit log. |
 
-- The AI never makes the final decision. A human reviewer must approve a case.
-- A “Standard” tier means no automated warning sign was found; it does not mean the patient is safe.
-- Extraction failure or unresolved flags block approval. Rule-based screening runs independently on readable text.
-- Original source content remains primary. Machine translations and extracted details require human verification.
-- Intake accounts see their own operational status only. Reviewer and admin accounts can access clinical content.
-- The audit log records key actions and is hash-chained. Withdrawal erases case content and uploaded files while retaining an audit tombstone.
-- Use synthetic data only. Do not enter names, credentials, API keys, or real patient records.
+## Architecture
+
+```mermaid
+flowchart LR
+  subgraph Intake[Live interview]
+    T[Typed / spoken turn] -->|WebSocket, ~5 ms| R[Rule questions\npolicy + missing details]
+    T -->|debounced| M[Fast model questions\n+ guardrails]
+    R --> Q[Ask next]
+    M --> Q
+  end
+  Intake -->|submit| P
+  subgraph P[Pipeline: parallel where independent]
+    A[Transcribe ∥ OCR] --> E[Grounded extraction\nquotes must match source]
+    A --> S2[Second safety reader\nadds flags only]
+    E --> SR[Deterministic rules]
+    S2 --> SR
+    SR --> I[Integrity: injection, conflicts, quality]
+    I --> F[Follow-ups ∥ translations] --> D[Template draft note]
+  end
+  P -->|SSE live progress| Rev[Reviewer: evidence-linked brief]
+  Rev --> H[Human approve / reject]
+  H -.-> AU[(Hash-chained audit)]
+```
+
+Design choices worth knowing:
+
+- **Rules decide, models assist.** Deterministic rules in a YAML policy set the tier. Models may add flags but can never remove one or lower the tier. A case that couldn't be assessed is "Undetermined", never "Standard".
+- **Grounded extraction.** Every symptom and fact must quote the source exactly. Items whose quote can't be found are dropped and flagged.
+- **Questions are metadata, never screened text.** An interview answer stores the question it answered. Rules screen only what the patient said, and extraction uses the question to interpret answers like a bare "No".
+- **It keeps working without AI.** With no provider key, the copilot runs in rules-only mode and the pipeline fails closed: the rules still run, and failures are flagged.
+- **Reliable demos.** `SEED_DEMO=on` loads synthetic cases on an empty database, and `LLM_CACHE=auto` replays identical provider calls.
 
 ## Run locally
 
-### Backend
+Backend (Python 3.11+):
 
-~~~bash
+```bash
 cd backend
-python3 -m venv .venv
-source .venv/bin/activate
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env
-~~~
-
-Put your `GROQ_API_KEY` and `OPENROUTER_API_KEY` in backend/.env (no Hugging Face token is needed). Never commit that file. Then start the API:
-
-~~~bash
+cp .env.example .env   # add GROQ_API_KEY / OPENROUTER_API_KEY (optional: rules-only works without them)
 uvicorn app.main:app --reload
-~~~
+```
 
-The API runs at http://127.0.0.1:8000 and interactive docs are at http://127.0.0.1:8000/docs. The local SQLite database is created at backend/data/careflow.db.
+Frontend (Node 18+):
 
-### Frontend
-
-In a second terminal:
-
-~~~bash
+```bash
 cd frontend
 npm install
 npm run dev
-~~~
+```
 
-Open http://localhost:5173. To use a different API address, set VITE_API_BASE_URL; the default is http://127.0.0.1:8000. The backend’s default CORS list allows localhost port 5173.
+Open http://localhost:5173. The API runs at http://127.0.0.1:8000 (docs at `/docs`).
 
 ### Demo accounts
 
-The default demo password is careflow-demo (change it with DEMO_PASSWORD).
+Password `careflow-demo` (change it with `DEMO_PASSWORD`). The sign-in page also has one-click role buttons.
 
-| Account | Role | Demo access |
+| Account | Role | Can do |
 |---|---|---|
-| intake1 | Intake | Create cases, view own processing status, withdraw eligible cases |
-| reviewer1, reviewer2 | Reviewer | Review queue, evidence, notes, and case decisions |
-| admin1 | Admin | Reviewer access plus audit tools |
+| intake1 | Intake | Live interviews; sees operational status only after submission |
+| reviewer1, reviewer2 | Reviewer | Queue, evidence-linked brief, flags, notes, decisions, ops, trust pages |
+| admin1 | Admin | Everything above, plus the audit log and hash-chain verification |
 
-These accounts demonstrate role-based access; they are not production authentication.
+## Deploy: Render (API) + Vercel (web)
 
-## Models and configuration
+1. **Render:** create a Blueprint from this repo; it reads `render.yaml`. Set `GROQ_API_KEY`, `OPENROUTER_API_KEY`, `DEMO_PASSWORD`, `CORS_ORIGINS` (your Vercel URL) and optionally `CORS_ORIGIN_REGEX` (for Vercel previews).
+2. **Vercel:** import the repo with **Root Directory `frontend`**. Set `VITE_API_BASE_URL` to the Render URL and deploy. `frontend/vercel.json` handles SPA routing and caching.
+3. **Free-tier notes:**
+   - Render free instances sleep when idle. The UI polls `/health` and shows a "waking up" banner instead of failing.
+   - The disk is ephemeral. `SEED_DEMO=on` re-creates the synthetic demo cases, and interrupted cases resume on boot.
+   - Open the app a minute before presenting.
 
-Provider, model, timeout, and fallback settings live in backend/.env.example. The checked-in example currently configures:
+## Verify
 
-| Task | Primary | Fallback / behavior |
-|---|---|---|
-| Extraction, structured translation, second safety reader | Groq `openai/gpt-oss-20b` (reasoning effort low) | Same model; one automatic retry with backoff on 429/5xx |
-| Speech transcription | Groq `whisper-large-v3` | Timestamps and confidence scores are retained |
-| Report images (OCR) | OpenRouter `nvidia/nemotron-3.5-content-safety:free` | If it returns no transcription (it is a safety classifier), the pipeline retries with `nvidia/nemotron-nano-12b-v2-vl:free` |
+```bash
+cd backend && python -m unittest discover -s tests -t .   # 69 tests, mocked models
+python ../eval/run_eval.py                                 # offline rule benchmark (116 synthetic cases)
+python ../eval/run_slm_eval.py                             # live extraction check; needs provider keys
+```
 
-Model availability and rate limits depend on your Groq and OpenRouter accounts (OpenRouter free models are rate-limited). These are hosted models, not a fully local deployment; Ollama is still supported via `EXTRACT_PROVIDER=local`. Run the model evaluation and a live workflow before presenting.
+The **Trust & safety** page runs the rule benchmark live inside the app. Reviewers and admins can open it, and
+admins can also verify the audit hash chain there.
 
-## Verification status
+**What has been verified:**
+- The automated tests cover the copilot rules and guardrails, interview sessions, the WebSocket flow, submission into the pipeline, seeding, metrics, roles, consent, the review flow and the audit chain.
+- The end-to-end browser walkthrough was run against the production build: sign-in, the live interview (rules plus a stubbed model endpoint), queue, case brief, ops, trust, dark mode and mobile sign-in.
 
-**Automated checks with mocked models** cover consent, roles and intake ownership, session expiry/logout, pipeline-failure screening for text/audio/OCR, evidence offsets, audio timestamps, rule screening in English/Hindi/Hinglish/Urdu, review and referral rules, privacy-safe intake responses, and audit events/hash-chain behavior.
+**Not verified in that walkthrough:**
+- Live provider calls (Groq / OpenRouter).
+- Microphone capture on real devices.
+- Report OCR quality.
+- Translation quality.
 
-The offline rule benchmark contains synthetic current-warning, negated/past-context, and benign near-miss cases. Forty-seven additional regression examples are provided as readable JSON Lines in `samples/regression/safety_regression_cases.jsonl`; the automated safety tests require those examples to remain synchronized with the benchmark. Passing this benchmark checks the listed phrases and rule behavior only. It does not measure clinical accuracy or guarantee detection on other wording.
-
-**Live checks reported before the model switch:** text extraction in English, Hindi, and Hinglish, plus voice transcription. The new Qwen SLM defaults have not been live-verified yet; run the model evaluation and a full synthetic workflow with the final configuration before reporting them as checked.
-
-**Not verified live in the review checklist:** the new Hugging Face text and vision model configuration, report-image vision OCR, PDFs, other Indian languages, the optional second safety reader, machine-translation quality, and end-to-end frontend workflows. The frontend production build passes, but that does not verify browser microphone capture or provider-backed workflows. Microphone capture is a known Firefox reliability issue: it worked once and later produced silent audio. Do not demo it until the audio preview is consistently audible; use a separately verified synthetic upload or typed input as a fallback. Language labels are informational and do not establish accuracy for an individual case. Whisper may label Hindi speech as Urdu or garble words; use a Hindi language hint where appropriate and tune STT_LOW_CONF in the backend environment.
-
-## Run the automated checks
-
-~~~bash
-cd backend
-python -m unittest discover -s tests -t .
-cd ..
-python eval/run_eval.py
-python eval/run_slm_eval.py  # live model check; needs backend provider credentials
-~~~
-
-Both evaluations use synthetic examples and are not clinical validation. The model evaluation checks source-grounded evidence, symptom status, and negation on a small fixed set. Report results only after running it with the final model configuration; do not present either score as evidence of clinical accuracy.
-
-## Project documents
-
-- [Milestone 1 review brief](docs/milestone-1-review.md): presentation narrative, demo sequence, and honest verification status.
-- [Architecture](docs/architecture.md): pipeline and workflow.
-- [Assumptions and scope](docs/assumptions.md): safety, privacy, and prototype boundaries.
-- [Frontend product brief](docs/frontend-brief-for-claude.md): current UI and handoff context.
-- [Backend implementation notes](docs/backend-change-instructions.md): current backend behavior and route additions.
+Run a full synthetic workflow with your keys before presenting. The recorder warns when a recording contains no
+sound (a known Firefox issue on some devices).
 
 ## Repository layout
 
-~~~text
-backend/   FastAPI API, pipeline, safety rules, and automated tests
-frontend/  React + TypeScript + Vite demo
-docs/      Architecture, assumptions, handoff brief, and review notes
-eval/      Synthetic rule-evaluation cases and runner
-samples/   Synthetic demo inputs
-~~~
+```text
+backend/   FastAPI API: interview copilot (app/copilot), pipeline, safety rules, SSE/metrics, tests
+frontend/  React + TypeScript + Vite + Tailwind app
+eval/      Synthetic rule benchmark and live extraction check
+samples/   Synthetic text and audio inputs
+docs/      Architecture, demo script, assumptions, test-case PDFs
+```
 
+See [docs/demo-script.md](docs/demo-script.md) for a 3-minute judging walkthrough and
+[docs/architecture.md](docs/architecture.md) for details.

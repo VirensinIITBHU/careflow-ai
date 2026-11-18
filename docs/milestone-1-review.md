@@ -1,3 +1,5 @@
+> **Historical (v1).** The frontend was rewritten in v2; see the README and docs/architecture.md for the current product.
+
 # CareFlow AI | Milestone 1 Review
 
 ## One-minute overview
